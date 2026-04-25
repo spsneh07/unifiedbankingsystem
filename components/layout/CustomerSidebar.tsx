@@ -14,6 +14,7 @@ const nav = [
   { href: '/credit-cards', icon: CreditCard, label: 'Credit Cards' },
   { href: '/loans', icon: Banknote, label: 'Loans' },
   { href: '/analytics', icon: BarChart2, label: 'Analytics' },
+  { href: '/branches', icon: Landmark, label: 'Branch Locator' },
   { href: '/scheduled', icon: CalendarClock, label: 'Auto-Pay' },
   { href: '/alerts', icon: Bell, label: 'Alerts' },
 ]

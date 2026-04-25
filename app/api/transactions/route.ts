@@ -7,18 +7,41 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    let customerId = searchParams.get('customerId');
+    const paramCustomerId = searchParams.get('customerId');
+    
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('ub_user_id')?.value;
+    let userRole = 'customer';
+    let sessionCustomerId = null;
 
-    if (!customerId) {
-      const cookieStore = await cookies();
-      const userId = cookieStore.get('ub_user_id')?.value;
-      if (userId) {
-        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
-        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+    if (userId) {
+      const userRes: any = await query('SELECT customer_id, role FROM users WHERE user_id = ?', [userId]);
+      if (userRes.length) {
+        userRole = userRes[0].role;
+        sessionCustomerId = userRes[0].customer_id;
       }
     }
 
-    if (!customerId) return NextResponse.json([]);
+    let targetCustomerId = paramCustomerId;
+    if (userRole === 'customer') {
+      targetCustomerId = sessionCustomerId;
+    }
+
+    // Role-based Query Logic
+    if ((userRole === 'admin' || userRole === 'employee') && !targetCustomerId) {
+      // Return ALL transactions for admin/employee if no specific customer is requested
+      const transactions = await query(`
+        SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, a.account_no as account_number, c.name as customer_name 
+        FROM transactions t 
+        LEFT JOIN accounts a ON t.account_id = a.account_id
+        LEFT JOIN customers c ON a.customer_id = c.customer_id
+        ORDER BY t.created_at DESC
+        LIMIT 1000
+      `);
+      return NextResponse.json(transactions);
+    }
+
+    if (!targetCustomerId) return NextResponse.json([]);
 
     const transactions = await query(`
       SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, a.account_no as account_number 
@@ -26,7 +49,7 @@ export async function GET(request: Request) {
       LEFT JOIN accounts a ON t.account_id = a.account_id
       WHERE a.customer_id = ?
       ORDER BY t.created_at DESC
-    `, [customerId]);
+    `, [targetCustomerId]);
     
     return NextResponse.json(transactions);
   } catch (error: any) {

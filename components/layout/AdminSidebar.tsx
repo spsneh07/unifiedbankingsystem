@@ -13,6 +13,7 @@ const nav = [
   { href: '/admin/accounts', icon: CreditCard, label: 'Accounts' },
   { href: '/admin/transactions', icon: ArrowLeftRight, label: 'Transactions' },
   { href: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
+  { href: '/admin/branches', icon: Landmark, label: 'Branches' },
   { href: '/admin/fraud', icon: ShieldAlert, label: 'Fraud Detection' },
   { href: '/admin/loans', icon: Banknote, label: 'Loans' },
   { href: '/admin/alerts', icon: Bell, label: 'Alerts' },

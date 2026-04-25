@@ -4,27 +4,29 @@ import type { NextRequest } from 'next/server'
 const ROLE_ROUTES: Record<string, string[]> = {
   admin:    ['/admin'],
   employee: ['/employee'],
-  customer: ['/dashboard', '/accounts', '/transactions', '/analytics', '/alerts', '/scheduled', '/credit-cards', '/loans'],
+  customer: ['/dashboard', '/accounts', '/transactions', '/analytics', '/alerts', '/scheduled', '/credit-cards', '/loans', '/branches'],
 }
 
-const PUBLIC_PATHS = ['/', '/auth', '/api', '/signup']
+const PUBLIC_PATHS = ['/', '/auth', '/api', '/signup', '/branches']
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
 }
 
 function getRoleHome(role: string): string {
-  if (role === 'admin') return '/admin'
-  if (role === 'employee') return '/employee'
+  const r = role.toLowerCase()
+  if (r === 'admin') return '/admin'
+  if (r === 'employee') return '/employee'
   return '/dashboard'
 }
 
 function isAllowed(role: string, pathname: string): boolean {
-  const allowed = ROLE_ROUTES[role] || []
+  const normalizedRole = role.toLowerCase()
+  const allowed = ROLE_ROUTES[normalizedRole] || []
   return allowed.some(prefix => pathname === prefix || pathname.startsWith(prefix + '/'))
 }
 
-export function proxy(request: NextRequest) {
+export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Skip public paths and static assets

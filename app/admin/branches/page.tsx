@@ -1,11 +1,24 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Badge from '@/components/ui/Badge'
-import { mockBranches, mockEmployees, mockAccounts } from '@/lib/mockData'
+import { mockEmployees, mockAccounts } from '@/lib/mockData'
 import { GitBranch, Users, ChevronDown, ChevronUp, MapPin, Phone } from 'lucide-react'
+import BranchMap from '@/components/BranchMap'
 
 export default function BranchesPage() {
+  const [branches, setBranches] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState<number | null>(1)
+
+  useEffect(() => {
+    fetch('/api/branches')
+      .then(res => res.json())
+      .then(data => {
+        setBranches(data)
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
 
   return (
     <div className="p-6 space-y-5 animate-fade-in">
@@ -13,9 +26,9 @@ export default function BranchesPage() {
         {/* Summary */}
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Total Branches', value: mockBranches.length, icon: GitBranch, color: '#00d4aa' },
+            { label: 'Total Branches', value: branches.length, icon: GitBranch, color: '#00d4aa' },
             { label: 'Total Employees', value: mockEmployees.length, icon: Users, color: '#4090f0' },
-            { label: 'Avg Employees/Branch', value: (mockEmployees.length / mockBranches.length).toFixed(1), icon: Users, color: '#f0c040' },
+            { label: 'Avg Employees/Branch', value: branches.length ? (mockEmployees.length / branches.length).toFixed(1) : '0', icon: Users, color: '#f0c040' },
           ].map(s => (
             <div key={s.label} className="card p-4 flex items-center gap-4">
               <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: `${s.color}18` }}>
@@ -31,7 +44,9 @@ export default function BranchesPage() {
 
         {/* Branch accordion */}
         <div className="space-y-3">
-          {mockBranches.map(branch => {
+          {loading ? (
+            <div className="text-center py-10 text-[#8890a0]">Loading branches...</div>
+          ) : branches.map((branch: any) => {
             const employees = mockEmployees.filter(e => e.branch_id === branch.branch_id)
             const accounts = mockAccounts.filter(a => a.branch_id === branch.branch_id)
             const isOpen = expanded === branch.branch_id
@@ -72,6 +87,12 @@ export default function BranchesPage() {
                         <MapPin size={13} className="text-[#8890a0]" />
                         <p className="text-[13px] text-white truncate">{branch.address}</p>
                       </div>
+                    </div>
+
+                    {/* Branch Map */}
+                    <div className="space-y-2">
+                       <p className="text-[12px] font-display font-600 uppercase tracking-widest text-[#8890a0]">Location Map</p>
+                       <BranchMap lat={branch.latitude} lng={branch.longitude} address={branch.address} />
                     </div>
 
                     {/* Employees table */}

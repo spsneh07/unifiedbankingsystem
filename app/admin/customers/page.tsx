@@ -13,10 +13,17 @@ export default function CustomersPage() {
 
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
-    fetch('/api/customers', { cache: 'no-store' }).then(r => r.json()).then(d => {
-      setData(d)
-      setLoading(false)
-    })
+    fetch('/api/customers', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => {
+        setData(Array.isArray(d) ? d : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch customers:', err);
+        setData([]);
+        setLoading(false);
+      });
   }, [user?.id])
 
   if (loading) return <div className="p-6 text-white">Loading...</div>

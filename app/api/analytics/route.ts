@@ -7,23 +7,31 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    let customerId = searchParams.get('customerId');
+    const paramCustomerId = searchParams.get('customerId');
+    
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('ub_user_id')?.value;
+    let userRole = 'customer';
+    let sessionCustomerId = null;
 
-    if (!customerId) {
-      const cookieStore = await cookies();
-      const userId = cookieStore.get('ub_user_id')?.value;
-      if (userId) {
-        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
-        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+    if (userId) {
+      const userRes: any = await query('SELECT customer_id, role FROM users WHERE user_id = ?', [userId]);
+      if (userRes.length) {
+        userRole = userRes[0].role;
+        sessionCustomerId = userRes[0].customer_id;
       }
     }
 
-    if (!customerId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    // Determine target customerId
+    let targetCustomerId = paramCustomerId;
+    if (userRole === 'customer') {
+      targetCustomerId = sessionCustomerId;
+      if (!targetCustomerId) return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const params: any[] = [customerId];
-    const whereClause = 'WHERE a.customer_id = ?';
+    const isGlobal = (userRole === 'admin' || userRole === 'employee') && !targetCustomerId;
+    const whereClause = isGlobal ? '' : 'WHERE a.customer_id = ?';
+    const params = isGlobal ? [] : [targetCustomerId];
 
     const byCategory: any = await query(`
       SELECT
@@ -48,7 +56,7 @@ export async function GET(request: Request) {
         COUNT(*) as transaction_count
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.account_id
-      ${whereClause ? whereClause + ' AND' : 'WHERE'} t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+      ${isGlobal ? 'WHERE' : whereClause + ' AND'} t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
       GROUP BY month_key, month
       ORDER BY month_key ASC
     `, params);
@@ -60,7 +68,7 @@ export async function GET(request: Request) {
         COUNT(*) as count
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.account_id
-      ${whereClause ? whereClause + ' AND' : 'WHERE'} t.type != 'deposit'
+      ${isGlobal ? 'WHERE' : whereClause + ' AND'} t.type != 'deposit'
       GROUP BY category
       ORDER BY total_amount DESC
       LIMIT 10
@@ -77,9 +85,22 @@ export async function GET(request: Request) {
       GROUP BY t.type
     `, params);
 
+    // Additional Global Stats for Admin
+    let globalStats = null;
+    if (isGlobal) {
+      const [stats]: any = await query(`
+        SELECT 
+          (SELECT COUNT(*) FROM customers) as total_customers,
+          (SELECT COUNT(*) FROM accounts) as total_accounts,
+          (SELECT SUM(balance) FROM accounts) as total_liquidity,
+          (SELECT COUNT(*) FROM transactions WHERE created_at >= CURDATE()) as today_transactions
+      `);
+      globalStats = stats;
+    }
+
     return NextResponse.json({
       success: true,
-      data: { byCategory, monthly, topSpending, byType }
+      data: { byCategory, monthly, topSpending, byType, globalStats }
     });
   } catch (error: any) {
     console.error('Analytics API Error:', error);

@@ -27,18 +27,25 @@ export default function AccountsPage() {
 
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
-    fetch('/api/accounts', { cache: 'no-store' }).then(r => r.json()).then(d => {
-      setData(d)
-      setLoading(false)
-    })
+    fetch('/api/accounts', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(d => {
+        setData(Array.isArray(d) ? d : []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Failed to fetch accounts:', err);
+        setData([]);
+        setLoading(false);
+      });
   }, [user?.id])
 
   if (loading) return <div className="p-6 text-white">Loading...</div>
 
   const mappedAccounts = data.map(a => ({
     ...a,
-    customer_name: `${a.first_name} ${a.last_name}`,
-    bank_name: a.type === 'checking' ? 'Checking' : 'Savings',
+    customer_name: a.customer_name || 'N/A',
+    bank_name: a.bank_name || (a.type === 'checking' ? 'Checking' : 'Savings'),
     account_no: a.account_number,
     balance: parseFloat(a.balance),
     account_type: a.type

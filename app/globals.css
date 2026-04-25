@@ -245,3 +245,22 @@ select.input {
 .sql-number {
   color: #f06040;
 }
+
+/* Leaflet Dark Theme */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+.leaflet-tile-pane {
+  filter: brightness(0.6) contrast(1.2);
+}
+.leaflet-popup-content-wrapper {
+  background: white !important;
+  color: #0a0c10 !important;
+  border-radius: 8px !important;
+}
+.leaflet-popup-tip {
+  background: white !important;
+}

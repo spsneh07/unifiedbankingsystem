@@ -2,6 +2,8 @@
 import Link from 'next/link'
 import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
+import { Landmark, Shield, Zap, Globe, Lock, BarChart3, ChevronRight, PlayCircle, Star, ArrowRight } from 'lucide-react'
+import FooterBranchLink from '@/components/layout/FooterBranchLink'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -294,18 +296,99 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── FOOTER ─── */}
-        <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '40px 2rem' }}>
-          <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
-            <Link href="/" style={{ display:'flex', alignItems:'center', gap:8, fontWeight:800, fontSize:18 }}>
-              🏦 Unified<span style={{ color:'#00d4aa' }}>Bank</span>
-            </Link>
-            <div style={{ display:'flex', gap:28 }}>
-              {['About','Features','Contact','Privacy'].map(l => (
-                <a key={l} href="#" className="nav-link">{l}</a>
-              ))}
+        {/* ─── ENHANCED FOOTER ─── */}
+        <footer style={{ background: 'linear-gradient(180deg, transparent, rgba(0,212,170,0.02))', borderTop: '1px solid rgba(255,255,255,0.05)', padding: '80px 2rem 40px' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            
+            {/* Upper Footer: Branding & Newsletter */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 60, marginBottom: 80, alignItems: 'flex-start' }}>
+              <div>
+                <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 800, fontSize: 24, color: '#f0f2f8', marginBottom: 24 }}>
+                  <span style={{ fontSize: 28 }}>🏦</span>
+                  Unified<span style={{ color: '#00d4aa' }}>Bank</span>
+                </Link>
+                <p style={{ fontSize: 16, color: '#8890a0', lineHeight: 1.6, maxWidth: 400, marginBottom: 32 }}>
+                  Unifying the world's financial protocols into a single, high-precision instrument. Secure, audited, and enterprise-ready.
+                </p>
+                <div style={{ display: 'flex', gap: 16 }}>
+                  {['ISO 27001', 'SOC2 Type II', 'PCI DSS'].map(badge => (
+                    <div key={badge} style={{ fontSize: 10, fontWeight: 700, color: '#00d4aa', background: 'rgba(0,212,170,0.05)', border: '1px solid rgba(0,212,170,0.15)', padding: '4px 10px', borderRadius: 6, letterSpacing: '0.05em' }}>
+                      {badge}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 20, padding: 32, backdropFilter: 'blur(20px)' }}>
+                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#f0f2f8', marginBottom: 12 }}>Stay ahead of the curve</h3>
+                <p style={{ fontSize: 14, color: '#8890a0', marginBottom: 24 }}>Get the latest updates on multi-bank analytics and security protocols.</p>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <input type="email" placeholder="Enter your email" style={{ flex: 1, background: '#080a0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, padding: '12px 16px', color: '#f0f2f8', fontSize: 14, outline: 'none' }} />
+                  <button className="glow-btn" style={{ background: 'linear-gradient(135deg,#46f1c5,#00d4aa)', color: '#002118', fontWeight: 700, fontSize: 14, padding: '0 24px', borderRadius: 10 }}>
+                    Subscribe
+                  </button>
+                </div>
+              </div>
             </div>
-            <div style={{ fontSize: 13, color: '#8890a0' }}>© 2025 UnifiedBank. All rights reserved.</div>
+
+            {/* Middle Footer: Links Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40, marginBottom: 80 }}>
+              <div>
+                <h4 style={{ fontSize: 13, fontWeight: 700, color: '#f0f2f8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24 }}>Product</h4>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {['Multi-Bank Integration', 'Real-Time Transactions', 'AI Fraud Detection', 'Unified Analytics', 'Scheduled Payments'].map(link => (
+                    <li key={link} style={{ marginBottom: 12 }}>
+                      <a href="#" style={{ fontSize: 14, color: '#8890a0', transition: 'color 0.2s' }} className="nav-link">{link}</a>
+                    </li>
+                  ))}
+                  <li style={{ marginBottom: 12 }}>
+                    <FooterBranchLink />
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 style={{ fontSize: 13, fontWeight: 700, color: '#f0f2f8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24 }}>Resources</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {['API Documentation', 'Security Protocol', 'Help Center', 'Developer Community', 'System Status'].map(link => (
+                    <li key={link} style={{ marginBottom: 12 }}>
+                      <a href="#" style={{ fontSize: 14, color: '#8890a0' }} className="nav-link">{link}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 style={{ fontSize: 13, fontWeight: 700, color: '#f0f2f8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24 }}>Company</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {['About UnifiedBank', 'Our Mission', 'Careers', 'Press Kit', 'Contact Us'].map(link => (
+                    <li key={link} style={{ marginBottom: 12 }}>
+                      <a href="#" style={{ fontSize: 14, color: '#8890a0' }} className="nav-link">{link}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h4 style={{ fontSize: 13, fontWeight: 700, color: '#f0f2f8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24 }}>Legal</h4>
+                <ul style={{ listStyle: 'none' }}>
+                  {['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'Fraud Disclaimer', 'Regulatory Disclosure'].map(link => (
+                    <li key={link} style={{ marginBottom: 12 }}>
+                      <a href="#" style={{ fontSize: 14, color: '#8890a0' }} className="nav-link">{link}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Bottom Footer: Copyright & Social */}
+            <div style={{ paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: 13, color: '#3d4455' }}>
+                © 2025 UnifiedBank Financial Technologies Ltd. All rights reserved. Precision engineered in India.
+              </div>
+              <div style={{ display: 'flex', gap: 24 }}>
+                {['GitHub', 'LinkedIn', 'X (Twitter)', 'YouTube'].map(social => (
+                  <a key={social} href="#" style={{ fontSize: 13, color: '#8890a0' }} className="nav-link">{social}</a>
+                ))}
+              </div>
+            </div>
           </div>
         </footer>
 

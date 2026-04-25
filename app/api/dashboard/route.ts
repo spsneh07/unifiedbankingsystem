@@ -9,36 +9,72 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     let customerId = searchParams.get('customerId');
 
-    if (!customerId) {
-      const cookieStore = await cookies();
-      const userId = cookieStore.get('ub_user_id')?.value;
-      if (userId) {
-        const userRes: any = await query('SELECT customer_id, email, role FROM users WHERE user_id = ?', [userId]);
-        if (userRes.length) {
-          const user = userRes[0];
-          if (user.customer_id) {
-            customerId = user.customer_id;
-          } else if (user.role === 'customer') {
-            // AUTO-FIX: Lazy initialize customer profile
-            const aadhar = 'AD' + Math.floor(Math.random() * 100000000000).toString().padStart(12, '0');
-            const customerRes: any = await query(
-              'INSERT INTO customers (name, email, phone, address, aadhar) VALUES (?, ?, ?, ?, ?)',
-              [user.email.split('@')[0], user.email, 'N/A', 'N/A', aadhar]
-            );
-            customerId = customerRes.insertId;
-            await query('UPDATE users SET customer_id = ? WHERE user_id = ?', [customerId, userId]);
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('ub_user_id')?.value;
+    let userRole = 'customer';
+    let resolvedUserId = null;
 
-            // Create a default account for this lazily initialized customer
-            const accountNo = 'ACC' + Math.floor(Math.random() * 1000000000).toString().padStart(10, '0');
-            await query(
-              'INSERT INTO accounts (customer_id, account_no, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-              [customerId, accountNo, 1, 'SBI', 'Savings', 0, 'Active']
-            );
-          }
+    if (userId) {
+      const userRes: any = await query('SELECT customer_id, email, role, user_id FROM users WHERE user_id = ?', [userId]);
+      if (userRes.length) {
+        const user = userRes[0];
+        userRole = user.role;
+        resolvedUserId = user.user_id;
+        if (user.customer_id) {
+          customerId = user.customer_id;
+        } else if (user.role === 'customer') {
+          // AUTO-FIX: Lazy initialize customer profile
+          const aadhar = 'AD' + Math.floor(Math.random() * 100000000000).toString().padStart(12, '0');
+          const customerRes: any = await query(
+            'INSERT INTO customers (name, email, phone, address, aadhar) VALUES (?, ?, ?, ?, ?)',
+            [user.email.split('@')[0], user.email, 'N/A', 'N/A', aadhar]
+          );
+          customerId = customerRes.insertId;
+          await query('UPDATE users SET customer_id = ? WHERE user_id = ?', [customerId, userId]);
+
+          // Create a default account for this lazily initialized customer
+          const accountNo = 'ACC' + Math.floor(Math.random() * 1000000000).toString().padStart(10, '0');
+          await query(
+            'INSERT INTO accounts (customer_id, account_no, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [customerId, accountNo, 1, 'SBI', 'Savings', 0, 'Active']
+          );
         }
       }
     }
 
+    if (userRole === 'admin' || userRole === 'employee') {
+      // Return GLOBAL stats for admins/employees
+      const [b]: any = await query('SELECT SUM(balance) as totalBalance FROM accounts');
+      const [a]: any = await query('SELECT COUNT(*) as totalAccounts FROM accounts');
+      const [c]: any = await query('SELECT COUNT(*) as totalCustomers FROM customers');
+      
+      const fraudAlerts = await query(`
+        SELECT t.*, a.account_no as account_no 
+        FROM transactions t 
+        LEFT JOIN accounts a ON t.account_id = a.account_id
+        WHERE t.is_suspicious = 1
+      `);
+
+      const recentTx = await query(`
+        SELECT t.transaction_id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_no as account_no
+        FROM transactions t
+        LEFT JOIN accounts a ON t.account_id = a.account_id
+        ORDER BY t.created_at DESC LIMIT 10
+      `);
+
+      return NextResponse.json({
+        success: true,
+        data: {
+          totalBalance: b?.totalBalance || 0,
+          totalAccounts: a?.totalAccounts || 0,
+          totalCustomers: c?.totalCustomers || 0,
+          fraudAlerts,
+          recentTx
+        }
+      });
+    }
+
+    // Regular customer logic
     if (!customerId) {
       return NextResponse.json({ success: false, error: 'Customer context not found' }, { status: 401 });
     }

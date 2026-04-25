@@ -7,26 +7,50 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    let customerId = searchParams.get('customerId');
+    const paramCustomerId = searchParams.get('customerId');
+    
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('ub_user_id')?.value;
+    let userRole = 'customer';
+    let sessionCustomerId = null;
 
-    if (!customerId) {
-      const cookieStore = await cookies();
-      const userId = cookieStore.get('ub_user_id')?.value;
-      if (userId) {
-        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
-        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+    if (userId) {
+      const userRes: any = await query('SELECT customer_id, role FROM users WHERE user_id = ?', [userId]);
+      if (userRes.length) {
+        userRole = userRes[0].role;
+        sessionCustomerId = userRes[0].customer_id;
       }
     }
 
-    if (!customerId) return NextResponse.json([]);
+    // Determine target customerId
+    // If admin/employee and they provided a param, use it.
+    // If customer, they can only see their own (ignore param if they try to fish)
+    let targetCustomerId = paramCustomerId;
+    if (userRole === 'customer') {
+      targetCustomerId = sessionCustomerId;
+    }
+
+    // Role-based Query Logic
+    if ((userRole === 'admin' || userRole === 'employee') && !targetCustomerId) {
+      // Return ALL accounts for admin/employee if no specific customer is requested
+      const accounts = await query(`
+        SELECT a.account_id as id, a.account_no as account_number, a.bank_name, a.account_type as type, a.balance, a.status, a.created_at, c.name as customer_name 
+        FROM accounts a 
+        LEFT JOIN customers c ON a.customer_id = c.customer_id
+        ORDER BY a.created_at DESC
+      `);
+      return NextResponse.json(accounts);
+    }
+
+    if (!targetCustomerId) return NextResponse.json([]);
 
     const accounts = await query(`
-      SELECT a.account_id as id, a.account_no as account_number, a.account_type as type, a.balance, a.status, a.created_at, c.name as first_name, '' as last_name 
+      SELECT a.account_id as id, a.account_no as account_number, a.bank_name, a.account_type as type, a.balance, a.status, a.created_at, c.name as customer_name 
       FROM accounts a 
       LEFT JOIN customers c ON a.customer_id = c.customer_id
       WHERE a.customer_id = ?
       ORDER BY a.created_at DESC
-    `, [customerId]);
+    `, [targetCustomerId]);
     
     return NextResponse.json(accounts);
   } catch (error: any) {

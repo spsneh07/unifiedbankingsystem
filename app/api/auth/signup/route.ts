@@ -6,7 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: Request) {
   try {
-    const { email, password, role } = await req.json()
+    const { email, password, role, name, phone, address, aadhar } = await req.json()
 
     if (!email || !password) {
       return NextResponse.json({ success: false, error: 'Email and password are required' }, { status: 400 })
@@ -16,9 +16,8 @@ export async function POST(req: Request) {
     const userRole = validRoles.includes(role) ? role : 'customer'
 
     const existingUser: any = await query('SELECT user_id FROM users WHERE email = ?', [email])
-    const existingCustomer: any = await query('SELECT customer_id FROM customers WHERE email = ?', [email])
     
-    if (existingUser.length > 0 || existingCustomer.length > 0) {
+    if (existingUser.length > 0) {
       return NextResponse.json({ success: false, error: 'Email already registered' }, { status: 409 })
     }
 
@@ -31,14 +30,15 @@ export async function POST(req: Request) {
     const userId = result.insertId;
 
     if (userRole === 'customer') {
-      const aadhar = 'AD' + Math.floor(Math.random() * 100000000000).toString().padStart(12, '0');
+      const finalAadhar = aadhar || ('AD' + Math.floor(Math.random() * 100000000000).toString().padStart(12, '0'));
       const customerRes: any = await query(
         'INSERT INTO customers (name, email, phone, address, aadhar) VALUES (?, ?, ?, ?, ?)',
-        [email.split('@')[0], email, 'N/A', 'N/A', aadhar]
+        [name || email.split('@')[0], email, phone || 'N/A', address || 'N/A', finalAadhar]
       );
       const customerId = customerRes.insertId;
       await query('UPDATE users SET customer_id = ? WHERE user_id = ?', [customerId, userId]);
 
+      // Create a default Savings account
       const accountNo = 'ACC' + Math.floor(Math.random() * 1000000000).toString().padStart(10, '0');
       await query(
         'INSERT INTO accounts (customer_id, account_no, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -48,6 +48,10 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, message: 'Account created successfully' })
   } catch (error: any) {
+    console.error('Signup Error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return NextResponse.json({ success: false, error: 'Email or identity details already registered' }, { status: 409 });
+    }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
