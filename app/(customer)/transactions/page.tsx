@@ -9,8 +9,9 @@ import { useRouter } from 'next/navigation'
 type TxType = 'deposit' | 'withdraw' | 'transfer'
 
 function txBadge(type: string) {
-  if (type === 'deposit') return <Badge variant="green">Deposit</Badge>
-  if (type === 'withdraw') return <Badge variant="red">Withdraw</Badge>
+  const t = type?.toLowerCase()
+  if (t === 'deposit') return <Badge variant="green">Deposit</Badge>
+  if (t === 'withdrawal' || t === 'withdraw') return <Badge variant="red">Withdraw</Badge>
   return <Badge variant="blue">Transfer</Badge>
 }
 
@@ -153,8 +154,8 @@ export default function TransactionsPage() {
                     <td className="px-5 py-3 text-white">{tx.description}</td>
                     <td className="px-5 py-3">{txBadge(tx.type)}</td>
                     <td className="px-5 py-3">
-                      <span className={`font-display font-700 ${tx.type === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
-                        {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
+                      <span className={`font-display font-700 ${tx.type?.toLowerCase() === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
+                        {tx.type?.toLowerCase() === 'deposit' ? '+' : '-'}{formatCurrency(tx.amount)}
                       </span>
                     </td>
                     <td className="px-5 py-3"><Badge variant="gray">{tx.category}</Badge></td>
@@ -183,7 +184,7 @@ export default function TransactionsPage() {
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Account</label>
               <select className="input text-sm" value={fromAccount} onChange={(e) => setFromAccount(e.target.value)}>
-                {accounts.filter(a => a.status === 'active').map(a => (
+                {accounts.filter(a => a.status?.toLowerCase() === 'active').map(a => (
                   <option key={a.id} value={a.id}>{a.account_number} ({formatCurrency(a.balance)})</option>
                 ))}
               </select>
@@ -218,7 +219,7 @@ export default function TransactionsPage() {
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Account</label>
               <select className="input text-sm" value={fromAccount} onChange={(e) => setFromAccount(e.target.value)}>
-                {accounts.filter(a => a.status === 'active').map(a => (
+                {accounts.filter(a => a.status?.toLowerCase() === 'active').map(a => (
                   <option key={a.id} value={a.id}>{a.account_number} ({formatCurrency(a.balance)})</option>
                 ))}
               </select>
@@ -250,7 +251,7 @@ export default function TransactionsPage() {
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">From Account</label>
               <select className="input text-sm" value={fromAccount} onChange={(e) => setFromAccount(e.target.value)}>
-                {accounts.filter(a => a.status === 'active').map(a => (
+                {accounts.filter(a => a.status?.toLowerCase() === 'active').map(a => (
                   <option key={a.id} value={a.id}>{a.account_number} ({formatCurrency(a.balance)})</option>
                 ))}
               </select>

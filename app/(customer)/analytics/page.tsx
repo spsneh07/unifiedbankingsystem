@@ -125,10 +125,12 @@ export default function AnalyticsPage() {
           <p className="text-[12px] text-[#8890a0] mt-0.5">Detailed spending by category</p>
         </div>
         <div className="divide-y divide-gray-200 dark:divide-[#1a1d24]">
-          {data.byCategory.map((cat: any, i: number) => {
+          {data.byCategory.length === 0 ? (
+            <div className="p-12 text-center text-[#8890a0]">No category data available for the selected period.</div>
+          ) : data.byCategory.map((cat: any, i: number) => {
             const color = getCategoryColor(cat.category, i)
             const amount = parseFloat(cat.total_amount)
-            const maxAmount = parseFloat(data.byCategory[0].total_amount)
+            const maxAmount = parseFloat(data.byCategory[0]?.total_amount || '1')
             const barWidth = (amount / maxAmount) * 100
             return (
               <div key={cat.category} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#111318]/60 transition-colors">

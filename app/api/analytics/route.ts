@@ -9,11 +9,11 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const customerId = searchParams.get('customerId');
 
-    let customerFilter = '';
     const params: any[] = [];
+    let whereClause = '';
 
     if (customerId) {
-      customerFilter = 'WHERE a.customer_id = ?';
+      whereClause = 'WHERE a.customer_id = ?';
       params.push(customerId);
     }
 
@@ -26,7 +26,7 @@ export async function GET(request: Request) {
         MAX(t.amount) as max_amount
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.account_id
-      ${customerFilter}
+      ${whereClause}
       GROUP BY category
       ORDER BY total_amount DESC
     `, params);
@@ -40,8 +40,7 @@ export async function GET(request: Request) {
         COUNT(*) as transaction_count
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.account_id
-      ${customerFilter}
-      WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+      ${whereClause ? whereClause + ' AND' : 'WHERE'} t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
       GROUP BY month_key, month
       ORDER BY month_key ASC
     `, params);
@@ -53,8 +52,7 @@ export async function GET(request: Request) {
         COUNT(*) as count
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.account_id
-      ${customerFilter}
-      WHERE t.type != 'deposit'
+      ${whereClause ? whereClause + ' AND' : 'WHERE'} t.type != 'deposit'
       GROUP BY category
       ORDER BY total_amount DESC
       LIMIT 10
@@ -67,7 +65,7 @@ export async function GET(request: Request) {
         SUM(t.amount) as total_amount
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.account_id
-      ${customerFilter}
+      ${whereClause}
       GROUP BY t.type
     `, params);
 
@@ -76,6 +74,7 @@ export async function GET(request: Request) {
       data: { byCategory, monthly, topSpending, byType }
     });
   } catch (error: any) {
+    console.error('Analytics API Error:', error);
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

@@ -113,11 +113,13 @@ export default function AdminAnalyticsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-[#1a1d24]">
-              {data.byCategory.map((cat: any, i: number) => {
+              {data.byCategory.length === 0 ? (
+                <tr><td colSpan={6} className="px-5 py-12 text-center text-[#8890a0]">No analytics data available.</td></tr>
+              ) : data.byCategory.map((cat: any, i: number) => {
                 const color = getCategoryColor(cat.category, i)
                 const amount = parseFloat(cat.total_amount)
                 const grand = data.byCategory.reduce((s: number, c: any) => s + parseFloat(c.total_amount), 0)
-                const pct = ((amount / grand) * 100).toFixed(1)
+                const pct = ((amount / (grand || 1)) * 100).toFixed(1)
                 return (
                   <tr key={cat.category} className="hover:bg-gray-50 dark:hover:bg-[#111318]/60 transition-colors">
                     <td className="px-5 py-3">
