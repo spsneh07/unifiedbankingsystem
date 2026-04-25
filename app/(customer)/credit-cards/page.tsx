@@ -2,14 +2,21 @@
 import { useState, useEffect } from 'react';
 import Badge from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/mockData';
-import { CreditCard, AlertTriangle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { CreditCard, AlertTriangle, ArrowUpRight, ArrowDownRight, IndianRupee } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import Modal from '@/components/ui/Modal';
 
 export default function CreditCardsPage() {
   const [cards, setCards] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const { toast } = useToast();
+
+  // Action Modal State
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [actionType, setActionType] = useState<'spend' | 'pay'>('spend');
+  const [actionAmount, setActionAmount] = useState('');
 
   const loadCards = () => {
     setLoading(true);
@@ -29,11 +36,17 @@ export default function CreditCardsPage() {
     loadCards();
   }, []);
 
-  const handleAction = async (cardId: number, action: 'spend' | 'pay') => {
-    const amountStr = prompt(`Enter amount to ${action}:`);
-    if (!amountStr) return;
+  const handleActionClick = (cardId: number, action: 'spend' | 'pay') => {
+    setSelectedCardId(cardId);
+    setActionType(action);
+    setActionAmount('');
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedCardId) return;
     
-    const amount = parseFloat(amountStr);
+    const amount = parseFloat(actionAmount);
     if (isNaN(amount) || amount <= 0) {
       toast('error', 'Invalid amount');
       return;
@@ -44,12 +57,13 @@ export default function CreditCardsPage() {
       const res = await fetch('/api/credit-cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ card_id: cardId, action, amount })
+        body: JSON.stringify({ card_id: selectedCardId, action: actionType, amount })
       });
       const data = await res.json();
       
       if (data.success) {
         toast('success', data.message);
+        setModalOpen(false);
         loadCards();
       } else {
         toast('error', data.error || 'Action failed');
@@ -136,14 +150,14 @@ export default function CreditCardsPage() {
               <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-[#1a1d24]">
                 <button 
                   disabled={actionLoading || available <= 0}
-                  onClick={() => handleAction(card.id, 'spend')}
+                  onClick={() => handleActionClick(card.id, 'spend')}
                   className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 dark:bg-[#1a1d24] dark:hover:bg-[#22262f] text-black dark:text-white py-2.5 rounded-lg text-sm font-600 transition-colors disabled:opacity-50"
                 >
                   <ArrowUpRight size={16} className="text-danger" /> Spend
                 </button>
                 <button 
                   disabled={actionLoading || used <= 0}
-                  onClick={() => handleAction(card.id, 'pay')}
+                  onClick={() => handleActionClick(card.id, 'pay')}
                   className="flex-1 flex items-center justify-center gap-2 bg-accent text-[#0a0c10] hover:bg-accent-dim py-2.5 rounded-lg text-sm font-600 transition-colors disabled:opacity-50"
                 >
                   <ArrowDownRight size={16} /> Pay Bill
@@ -161,6 +175,56 @@ export default function CreditCardsPage() {
           </div>
         )}
       </div>
+      <Modal 
+        open={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        title={actionType === 'spend' ? 'Card Transaction' : 'Pay Credit Card Bill'}
+      >
+        <div className="space-y-5">
+          <div className="p-4 rounded-xl bg-accent/5 border border-accent/10 flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${actionType === 'spend' ? 'bg-danger/10 text-danger' : 'bg-accent/10 text-accent'}`}>
+              {actionType === 'spend' ? <ArrowUpRight size={24} /> : <ArrowDownRight size={24} />}
+            </div>
+            <div>
+              <p className="text-[13px] text-[#8890a0]">
+                {actionType === 'spend' ? 'Enter amount to spend using your card' : 'Enter amount to pay towards your card bill'}
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-display font-600 uppercase tracking-widest text-[#8890a0] ml-1">Amount (₹)</label>
+            <div className="relative">
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-[#8890a0]"><IndianRupee size={20} /></span>
+              <input 
+                autoFocus
+                className="input w-full !pl-14 h-14 text-xl font-display font-700" 
+                type="number" 
+                placeholder="0.00" 
+                value={actionAmount}
+                onChange={(e) => setActionAmount(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button 
+              className={`flex-1 h-12 rounded-xl font-display font-700 text-[14px] transition-all flex items-center justify-center ${actionType === 'spend' ? 'bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20' : 'bg-accent text-[#0a0c10] hover:scale-[1.02] active:scale-[0.98]'}`}
+              onClick={handleSubmit}
+              disabled={actionLoading || !actionAmount}
+            >
+              {actionLoading ? 'Processing...' : actionType === 'spend' ? 'Confirm Spend' : 'Pay Bill Now'}
+            </button>
+            <button 
+              className="px-6 h-12 rounded-xl bg-[#1a1d24] text-[#8890a0] font-display font-700 text-[14px] hover:text-white transition-colors"
+              onClick={() => setModalOpen(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

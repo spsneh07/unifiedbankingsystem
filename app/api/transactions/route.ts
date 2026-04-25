@@ -46,23 +46,35 @@ export async function POST(request: Request) {
     const currentBalance = parseFloat(account.balance);
     const txAmount = parseFloat(amount);
 
+    const allowedCategories = [
+      "Food", "Travel", "Shopping", "Bills",
+      "Entertainment", "Healthcare", "Other",
+      "Transfer", "Deposit", "Withdraw", "Salary"
+    ];
+
+    const categoryProvided = body.category && allowedCategories.includes(body.category);
+    const safeCategory = categoryProvided ? body.category : null;
+
     if (type === 'deposit') {
-      await query('UPDATE accounts SET balance = balance + ? WHERE account_id = ?', [txAmount, account_id]);
-      await query('INSERT INTO transactions (account_id, type, amount, description, category) VALUES (?, ?, ?, ?, ?)', 
-        [account_id, 'deposit', txAmount, description || 'Deposit', 'Income']);
+      const newBalance = currentBalance + txAmount;
+      await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, account_id]);
+      await query('INSERT INTO transactions (account_id, type, amount, balance_after, description, category) VALUES (?, ?, ?, ?, ?, ?)', 
+        [account_id, 'Deposit', txAmount, newBalance, description || 'Deposit', safeCategory || 'Other']);
     } else if (type === 'withdraw') {
       if (currentBalance < txAmount) return NextResponse.json({ success: false, error: 'Insufficient balance' }, { status: 400 });
-      await query('UPDATE accounts SET balance = balance - ? WHERE account_id = ?', [txAmount, account_id]);
-      await query('INSERT INTO transactions (account_id, type, amount, description, category) VALUES (?, ?, ?, ?, ?)', 
-        [account_id, 'withdraw', txAmount, description || 'Withdrawal', 'Expense']);
+      const newBalance = currentBalance - txAmount;
+      await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, account_id]);
+      await query('INSERT INTO transactions (account_id, type, amount, balance_after, description, category) VALUES (?, ?, ?, ?, ?, ?)', 
+        [account_id, 'Withdrawal', txAmount, newBalance, description || 'Withdrawal', safeCategory || 'Bills']);
     } else if (type === 'transfer') {
       if (!receiver_account_id) return NextResponse.json({ success: false, error: 'Missing receiver account' }, { status: 400 });
       if (currentBalance < txAmount) return NextResponse.json({ success: false, error: 'Insufficient balance' }, { status: 400 });
       
-      await query('UPDATE accounts SET balance = balance - ? WHERE account_id = ?', [txAmount, account_id]);
+      const newBalance = currentBalance - txAmount;
+      await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, account_id]);
       await query('UPDATE accounts SET balance = balance + ? WHERE account_id = ?', [txAmount, receiver_account_id]);
-      await query('INSERT INTO transactions (account_id, type, amount, description, category) VALUES (?, ?, ?, ?, ?)', 
-        [account_id, 'transfer', txAmount, description || 'Transfer to ' + receiver_account_id, 'Transfer']);
+      await query('INSERT INTO transactions (account_id, type, amount, balance_after, description, category) VALUES (?, ?, ?, ?, ?, ?)', 
+        [account_id, 'Transfer', txAmount, newBalance, description || 'Transfer to ' + receiver_account_id, safeCategory || 'Other']);
     } else {
       return NextResponse.json({ success: false, error: 'Invalid transaction type' }, { status: 400 });
     }

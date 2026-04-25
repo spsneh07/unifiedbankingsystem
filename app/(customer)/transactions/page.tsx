@@ -110,13 +110,13 @@ export default function TransactionsPage() {
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-3">
-          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => { setModal('deposit'); setError(''); }}>
+          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => { setModal('deposit'); setCategory('Other'); setError(''); }}>
             <Plus size={15} /> Deposit
           </button>
-          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(240,80,80,0.12)', color: '#f05050', border: '1px solid rgba(240,80,80,0.2)' }} onClick={() => { setModal('withdraw'); setError(''); }}>
+          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(240,80,80,0.12)', color: '#f05050', border: '1px solid rgba(240,80,80,0.2)' }} onClick={() => { setModal('withdraw'); setCategory('Bills'); setError(''); }}>
             Withdraw
           </button>
-          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(64,144,240,0.12)', color: '#4090f0', border: '1px solid rgba(64,144,240,0.2)' }} onClick={() => { setModal('transfer'); setError(''); }}>
+          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(64,144,240,0.12)', color: '#4090f0', border: '1px solid rgba(64,144,240,0.2)' }} onClick={() => { setModal('transfer'); setCategory('Other'); setError(''); }}>
             Transfer
           </button>
           <div className="ml-auto flex gap-2">
@@ -200,7 +200,7 @@ export default function TransactionsPage() {
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Category</label>
               <select className="input text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
-                {['Income', 'Other'].map(c => <option key={c} value={c}>{c}</option>)}
+                {['Other', 'Salary', 'Deposit'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="flex gap-3 pt-2">
@@ -231,6 +231,14 @@ export default function TransactionsPage() {
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Description</label>
               <input className="input text-sm" placeholder="e.g. ATM withdrawal" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Category</label>
+              <select className="input text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
+                {['Bills', 'Food', 'Shopping', 'Travel', 'Entertainment', 'Healthcare', 'Other', 'Withdraw'].map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
             </div>
             <div className="p-3 rounded-lg bg-[#f05050]/10 border border-[#f05050]/20 text-[12px] text-[#f05050]">
               ⚠ Withdrawal over ₹50,000 will trigger a high transaction alert.
@@ -267,6 +275,12 @@ export default function TransactionsPage() {
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Description</label>
               <input className="input text-sm" placeholder="e.g. Rent payment" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+            <div>
+              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Category</label>
+              <select className="input text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
+                {['Transfer', 'Other'].map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
             </div>
             <div className="flex gap-3 pt-2">
               <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600 bg-[#4090f0]/15 text-[#4090f0] border border-[#4090f0]/30 flex justify-center items-center disabled:opacity-50" onClick={handleSubmit} disabled={actionLoading}>

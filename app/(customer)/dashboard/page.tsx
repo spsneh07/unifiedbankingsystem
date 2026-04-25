@@ -10,8 +10,9 @@ import { useState, useEffect } from 'react'
 import CreditScoreWidget from '@/components/dashboard/CreditScoreWidget'
 
 function txBadge(type: string) {
-  if (type === 'deposit') return <Badge variant="green">Deposit</Badge>
-  if (type === 'withdraw') return <Badge variant="red">Withdraw</Badge>
+  const t = type?.toLowerCase()
+  if (t === 'deposit') return <Badge variant="green">Deposit</Badge>
+  if (t === 'withdrawal' || t === 'withdraw') return <Badge variant="red">Withdraw</Badge>
   return <Badge variant="blue">Transfer</Badge>
 }
 
@@ -129,8 +130,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="w-1/4">{txBadge(tx.type)}</div>
                 <div className="w-1/6 text-right">
-                  <p className={`text-[15px] font-display font-700 ${tx.type === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
-                    {tx.type === 'deposit' ? '+' : '-'}{formatCurrency(parseFloat(tx.amount))}
+                  <p className={`text-[15px] font-display font-700 ${tx.type?.toLowerCase() === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
+                    {tx.type?.toLowerCase() === 'deposit' ? '+' : '-'}{formatCurrency(parseFloat(tx.amount))}
                   </p>
                 </div>
               </div>

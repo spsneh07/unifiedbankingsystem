@@ -6,21 +6,24 @@ export const dynamic = 'force-dynamic';
 
 async function autoExecuteScheduledTransactions() {
   const pending: any = await query(`
-    SELECT * FROM scheduled_transactions 
-    WHERE is_active = 1 AND next_execution <= CURDATE()
+    SELECT st.*, a.balance 
+    FROM scheduled_transactions st
+    JOIN accounts a ON st.account_id = a.account_id
+    WHERE st.is_active = 1 AND st.next_execution <= CURDATE()
   `);
 
   for (const st of pending) {
-    await query('UPDATE accounts SET balance = balance - ? WHERE account_id = ?', [st.amount, st.account_id]);
+    const newBalance = parseFloat(st.balance) - parseFloat(st.amount);
+    await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, st.account_id]);
     
     await query(`
-      INSERT INTO transactions (account_id, type, amount, description, category, created_at)
-      VALUES (?, 'withdraw', ?, ?, ?, NOW())
-    `, [st.account_id, st.amount, `Auto-pay: ${st.bill_type}`, 'Bills']);
+      INSERT INTO transactions (account_id, type, amount, balance_after, description, category, created_at)
+      VALUES (?, 'Withdrawal', ?, ?, ?, 'Bills', NOW())
+    `, [st.account_id, st.amount, newBalance, `Auto-pay: ${st.bill_type}`]);
 
     let interval = '1 MONTH';
     if (st.frequency === 'weekly') interval = '1 WEEK';
-    if (st.frequency === 'yearly') interval = '1 YEAR';
+    if (st.frequency === 'daily') interval = '1 DAY';
     
     await query(`
       UPDATE scheduled_transactions 
@@ -70,8 +73,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
       }
       await query(`
-        INSERT INTO scheduled_transactions (account_id, amount, frequency, bill_type, next_execution, is_active)
-        VALUES (?, ?, ?, ?, ?, 1)
+        INSERT INTO scheduled_transactions (account_id, amount, frequency, bill_type, start_date, next_execution, is_active)
+        VALUES (?, ?, ?, ?, CURDATE(), ?, 1)
       `, [account_id, amount, frequency, bill_type, next_execution]);
       return NextResponse.json({ success: true, message: 'Scheduled transaction created' });
     }
