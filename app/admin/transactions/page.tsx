@@ -81,7 +81,7 @@ export default function TransactionsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#1a1d24]">
-                  {['ID', 'Account', 'Description', 'Type', 'Amount', 'Category', 'Date', 'Flag'].map(h => (
+                  {['ID', 'Account', 'Description', 'Type', 'Amount', 'Category', 'Status', 'Date', 'Flag'].map(h => (
                     <th key={h} className="text-left px-5 py-3 text-[11px] font-display font-600 uppercase tracking-widest text-[#8890a0]">{h}</th>
                   ))}
                 </tr>
@@ -99,6 +99,9 @@ export default function TransactionsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3"><Badge variant="gray">{tx.category}</Badge></td>
+                    <td className="px-5 py-3">
+                      <Badge variant={tx.status === 'SUCCESS' ? 'green' : (tx.status === 'FAILED' ? 'red' : 'yellow')}>{tx.status || 'SUCCESS'}</Badge>
+                    </td>
                     <td className="px-5 py-3 text-[12px] text-[#8890a0]">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</td>
                     <td className="px-5 py-3">
                       {tx.is_suspicious && (

@@ -17,6 +17,7 @@ export default function CreditCardsPage() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [actionType, setActionType] = useState<'spend' | 'pay'>('spend');
   const [actionAmount, setActionAmount] = useState('');
+  const [otp, setOtp] = useState('');
   const [applying, setApplying] = useState(false);
 
   const loadCards = () => {
@@ -41,6 +42,7 @@ export default function CreditCardsPage() {
     setSelectedCardId(cardId);
     setActionType(action);
     setActionAmount('');
+    setOtp('');
     setModalOpen(true);
   };
 
@@ -58,12 +60,15 @@ export default function CreditCardsPage() {
       const res = await fetch('/api/credit-cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ card_id: selectedCardId, action: actionType, amount })
+        body: JSON.stringify({ card_id: selectedCardId, action: actionType, amount, otp })
       });
       const data = await res.json();
       
       if (data.success) {
-        toast('success', data.message);
+        toast('success', `${data.message} ${data.reference_id ? `(Ref: ${data.reference_id})` : ''}`);
+        if (data.is_suspicious) {
+          toast('error', 'Warning: High amount flagged by fraud detection.');
+        }
         setModalOpen(false);
         loadCards();
       } else {
@@ -238,17 +243,32 @@ export default function CreditCardsPage() {
             </div>
           </div>
 
+          <div className="space-y-1.5">
+            <label className="text-[11px] font-display font-600 uppercase tracking-widest text-[#8890a0] ml-1">OTP Verification</label>
+            <div className="relative">
+              <input 
+                className="input w-full h-14 text-xl font-display font-700" 
+                type="text" 
+                placeholder="Enter 6-digit OTP (mock)" 
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+              />
+            </div>
+          </div>
+
           <div className="flex gap-3">
             <button 
-              className={`flex-1 h-12 rounded-xl font-display font-700 text-[14px] transition-all flex items-center justify-center ${actionType === 'spend' ? 'bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20' : 'bg-accent text-[#0a0c10] hover:scale-[1.02] active:scale-[0.98]'}`}
+              className={`flex-1 h-12 rounded-xl font-display font-700 text-[14px] transition-all flex items-center justify-center disabled:opacity-50 ${actionType === 'spend' ? 'bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20' : 'bg-accent text-[#0a0c10] hover:scale-[1.02] active:scale-[0.98]'}`}
               onClick={handleSubmit}
               disabled={actionLoading || !actionAmount}
             >
-              {actionLoading ? 'Processing...' : actionType === 'spend' ? 'Confirm Spend' : 'Pay Bill Now'}
+              {actionLoading ? 'Processing Verification...' : actionType === 'spend' ? 'Confirm Spend' : 'Pay Bill Now'}
             </button>
             <button 
               className="px-6 h-12 rounded-xl bg-[#1a1d24] text-[#8890a0] font-display font-700 text-[14px] hover:text-white transition-colors"
               onClick={() => setModalOpen(false)}
+              disabled={actionLoading}
             >
               Cancel
             </button>

@@ -30,6 +30,7 @@ export default function TransactionsPage() {
   const [fromAccount, setFromAccount] = useState('')
   const [toAccount, setToAccount] = useState('')
   const [category, setCategory] = useState('Other')
+  const [otp, setOtp] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -63,8 +64,9 @@ export default function TransactionsPage() {
     account_no: t.account_number,
     amount: parseFloat(t.amount),
     transaction_date: t.created_at,
-    is_suspicious: parseFloat(t.amount) > 50000,
-    category: t.category || 'Other'
+    is_suspicious: parseFloat(t.amount) > 50000 || t.is_suspicious,
+    category: t.category || 'Other',
+    status: t.status || 'SUCCESS'
   }))
 
   let txs = mappedTransactions
@@ -85,7 +87,8 @@ export default function TransactionsPage() {
           account_id: fromAccount,
           receiver_account_id: modal === 'transfer' ? toAccount : undefined,
           description,
-          category
+          category,
+          otp: (modal === 'withdraw' || modal === 'transfer') ? otp : undefined
         })
       });
       const result = await res.json();
@@ -94,6 +97,7 @@ export default function TransactionsPage() {
         setModal(null);
         setAmount('');
         setDescription('');
+        setOtp('');
         fetchData(); // Refresh data
         router.refresh();
       } else {
@@ -105,18 +109,27 @@ export default function TransactionsPage() {
     setActionLoading(false);
   }
 
+  function getStatusBadge(status: string) {
+    switch (status) {
+      case 'PENDING': return <Badge variant="yellow">Pending</Badge>
+      case 'SUCCESS': return <Badge variant="green">Success</Badge>
+      case 'FAILED': return <Badge variant="red">Failed</Badge>
+      default: return <Badge variant="gray">{status}</Badge>
+    }
+  }
+
   return (
     <div className="p-6 space-y-5 animate-fade-in">
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-3">
-          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => { setModal('deposit'); setCategory('Other'); setError(''); }}>
+          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => { setModal('deposit'); setCategory('Other'); setError(''); setOtp(''); }}>
             <Plus size={15} /> Deposit
           </button>
-          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(240,80,80,0.12)', color: '#f05050', border: '1px solid rgba(240,80,80,0.2)' }} onClick={() => { setModal('withdraw'); setCategory('Bills'); setError(''); }}>
+          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(240,80,80,0.12)', color: '#f05050', border: '1px solid rgba(240,80,80,0.2)' }} onClick={() => { setModal('withdraw'); setCategory('Bills'); setError(''); setOtp(''); }}>
             Withdraw
           </button>
-          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(64,144,240,0.12)', color: '#4090f0', border: '1px solid rgba(64,144,240,0.2)' }} onClick={() => { setModal('transfer'); setCategory('Other'); setError(''); }}>
+          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(64,144,240,0.12)', color: '#4090f0', border: '1px solid rgba(64,144,240,0.2)' }} onClick={() => { setModal('transfer'); setCategory('Other'); setError(''); setOtp(''); }}>
             Transfer
           </button>
           <div className="ml-auto flex gap-2">
@@ -141,7 +154,7 @@ export default function TransactionsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[#1a1d24]">
-                  {['ID', 'Account', 'Description', 'Type', 'Amount', 'Category', 'Date', 'Flag'].map(h => (
+                  {['ID', 'Account', 'Description', 'Type', 'Amount', 'Category', 'Status', 'Date', 'Flag'].map(h => (
                     <th key={h} className="text-left px-5 py-3 text-[11px] font-display font-600 uppercase tracking-widest text-[#8890a0]">{h}</th>
                   ))}
                 </tr>
@@ -159,6 +172,7 @@ export default function TransactionsPage() {
                       </span>
                     </td>
                     <td className="px-5 py-3"><Badge variant="gray">{tx.category}</Badge></td>
+                    <td className="px-5 py-3">{getStatusBadge(tx.status)}</td>
                     <td className="px-5 py-3 text-[12px] text-[#8890a0]">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</td>
                     <td className="px-5 py-3">
                       {tx.is_suspicious && (
@@ -204,10 +218,10 @@ export default function TransactionsPage() {
               </select>
             </div>
             <div className="flex gap-3 pt-2">
-              <button className="btn-primary flex-1 text-sm flex justify-center items-center" onClick={handleSubmit} disabled={actionLoading}>
-                {actionLoading ? 'Processing...' : 'Confirm Deposit'}
+              <button className="btn-primary flex-1 text-sm flex justify-center items-center disabled:opacity-50" onClick={handleSubmit} disabled={actionLoading}>
+                {actionLoading ? 'Processing Verification...' : 'Confirm Deposit'}
               </button>
-              <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)} disabled={actionLoading}>Cancel</button>
             </div>
           </div>
         </Modal>
@@ -240,14 +254,18 @@ export default function TransactionsPage() {
                 ))}
               </select>
             </div>
+            <div>
+              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">OTP Verification</label>
+              <input className="input text-sm" placeholder="Enter 6-digit OTP (mock)" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            </div>
             <div className="p-3 rounded-lg bg-[#f05050]/10 border border-[#f05050]/20 text-[12px] text-[#f05050]">
-              ⚠ Withdrawal over ₹50,000 will trigger a high transaction alert.
+              ⚠ OTP is required for all withdrawals.
             </div>
             <div className="flex gap-3 pt-2">
               <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600 flex justify-center items-center disabled:opacity-50" style={{ background: 'rgba(240,80,80,0.15)', color: '#f05050', border: '1px solid rgba(240,80,80,0.3)' }} onClick={handleSubmit} disabled={actionLoading}>
-                {actionLoading ? 'Processing...' : 'Confirm Withdrawal'}
+                {actionLoading ? 'Processing Verification...' : 'Confirm Withdrawal'}
               </button>
-              <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)} disabled={actionLoading}>Cancel</button>
             </div>
           </div>
         </Modal>
@@ -282,11 +300,15 @@ export default function TransactionsPage() {
                 {['Transfer', 'Other'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
+            <div>
+              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">OTP Verification</label>
+              <input className="input text-sm" placeholder="Enter 6-digit OTP (mock)" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            </div>
             <div className="flex gap-3 pt-2">
               <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600 bg-[#4090f0]/15 text-[#4090f0] border border-[#4090f0]/30 flex justify-center items-center disabled:opacity-50" onClick={handleSubmit} disabled={actionLoading}>
-                {actionLoading ? 'Processing...' : 'Confirm Transfer'}
+                {actionLoading ? 'Processing Verification...' : 'Confirm Transfer'}
               </button>
-              <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)}>Cancel</button>
+              <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)} disabled={actionLoading}>Cancel</button>
             </div>
           </div>
         </Modal>

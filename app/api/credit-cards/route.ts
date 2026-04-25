@@ -34,31 +34,53 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const { action, card_id, amount } = await request.json();
+    const { action, card_id, amount, otp } = await request.json();
     
     // For actions other than 'apply', we need valid card_id and amount
     if (action !== 'apply' && (!action || !card_id || typeof amount !== 'number')) {
       return NextResponse.json({ success: false, error: 'Invalid parameters' }, { status: 400 });
     }
 
-    if (action === 'spend') {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('ub_user_id')?.value;
+    const auditUserId = userId || 1;
+
+    if (action === 'spend' || action === 'pay') {
+      // 1. SECURITY LAYER: OTP Validation
+      if (!otp) {
+        return NextResponse.json({ success: false, error: 'OTP verification required', requireOTP: true }, { status: 403 });
+      }
+
+      // 2. SIMULATE VERIFICATION (PENDING STATE in frontend)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
       const cards: any = await query('SELECT limit_amount, used_amount FROM credit_cards WHERE id = ?', [card_id]);
       if (!cards.length) return NextResponse.json({ success: false, error: 'Card not found' }, { status: 404 });
       
       const card = cards[0];
-      if (Number(card.used_amount) + amount > Number(card.limit_amount)) {
-        return NextResponse.json({ success: false, error: 'Credit limit exceeded' }, { status: 400 });
+      const refId = 'CC-' + Date.now() + '-' + Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+      
+      // 3. FRAUD CHECK (Mock average since we don't track CC tx history yet)
+      const mockAvgAmount = 5000; 
+      let isSuspicious = amount > (3 * mockAvgAmount) ? 1 : 0;
+
+      // 4. PROCESS ACTION
+      if (action === 'spend') {
+        if (Number(card.used_amount) + amount > Number(card.limit_amount)) {
+          await query('INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)', [auditUserId, 'CC_SPEND_FAILED', `Ref: ${refId}, Amount: ${amount}, Reason: Limit exceeded`]);
+          return NextResponse.json({ success: false, error: 'Credit limit exceeded' }, { status: 400 });
+        }
+        await query('UPDATE credit_cards SET used_amount = used_amount + ? WHERE id = ?', [amount, card_id]);
+        await query('INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)', [auditUserId, 'CC_SPEND_SUCCESS', `Ref: ${refId}, Amount: ${amount}, Suspicious: ${isSuspicious}`]);
+        
+        return NextResponse.json({ success: true, message: 'Spend successful', status: 'SUCCESS', reference_id: refId, is_suspicious: isSuspicious === 1 });
+      } else if (action === 'pay') {
+        await query('UPDATE credit_cards SET used_amount = GREATEST(used_amount - ?, 0) WHERE id = ?', [amount, card_id]);
+        await query('INSERT INTO audit_logs (user_id, action, details) VALUES (?, ?, ?)', [auditUserId, 'CC_PAY_SUCCESS', `Ref: ${refId}, Amount: ${amount}`]);
+        
+        return NextResponse.json({ success: true, message: 'Payment successful', status: 'SUCCESS', reference_id: refId });
       }
-      
-      await query('UPDATE credit_cards SET used_amount = used_amount + ? WHERE id = ?', [amount, card_id]);
-      return NextResponse.json({ success: true, message: 'Spend successful' });
-      
-    } else if (action === 'pay') {
-      await query('UPDATE credit_cards SET used_amount = GREATEST(used_amount - ?, 0) WHERE id = ?', [amount, card_id]);
-      return NextResponse.json({ success: true, message: 'Payment successful' });
     } else if (action === 'apply') {
-      const cookieStore = await cookies();
-      const userId = cookieStore.get('ub_user_id')?.value;
       let customerId = null;
       if (userId) {
         const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
@@ -67,7 +89,6 @@ export async function POST(request: Request) {
 
       if (!customerId) return NextResponse.json({ success: false, error: 'Customer profile not found' }, { status: 400 });
 
-      // Generate random 16 digit card number
       const card_number = Array.from({length: 4}, () => Math.floor(1000 + Math.random() * 9000)).join(' ');
       const limit_amount = 50000.00;
       const due_date = new Date();
