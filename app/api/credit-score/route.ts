@@ -85,10 +85,14 @@ export async function GET() {
       return NextResponse.json(scores);
     }
 
-    let customerId = 1;
+    let customerId = null;
     if (userId) {
       const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
       if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+    }
+
+    if (!customerId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
     const { score, loan_repayment_factor, credit_usage_factor, missed_payments_factor } = await calculateScore(customerId);

@@ -23,14 +23,43 @@ export default function DashboardPage() {
 
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
-    if (!user?.customer_id) return;
-    fetch(`/api/dashboard?customerId=${user.customer_id}`, { cache: 'no-store' })
+    if (!user?.id) {
+       setLoading(false);
+       return;
+    }
+    
+    // Use the API's ability to find customerId from session cookie
+    fetch(`/api/dashboard`, { cache: 'no-store' })
       .then(res => res.json())
-      .then(res => { if (res.success) setData(res.data); setLoading(false) })
+      .then(res => { 
+        if (res.success) {
+          setData(res.data);
+        } else {
+          setData({ error: res.error });
+        }
+        setLoading(false) 
+      })
       .catch(() => setLoading(false))
-  }, [user?.customer_id])
+  }, [user?.id])
 
-  if (loading || !data) return <div className="p-6 text-white">Loading...</div>
+  if (loading) {
+    return (
+      <div className="p-6 text-white flex items-center justify-center h-[60vh]">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-accent"></div>
+      </div>
+    )
+  }
+  
+  if (!data || data.error) {
+    return (
+      <div className="p-6 text-white flex flex-col items-center justify-center h-[80vh] text-center">
+        <ShieldAlert size={48} className="text-danger mb-4" />
+        <h2 className="text-2xl font-display font-700 mb-2">Account Setup Required</h2>
+        <p className="text-[#8890a0] mb-6 max-w-md">Your customer profile is not fully initialized. Please contact support or try logging in again.</p>
+        <button onClick={() => window.location.href = '/login'} className="btn-primary">Back to Login</button>
+      </div>
+    )
+  }
 
   const filtered = bankFilter === 'All' ? data.myAccounts : data.myAccounts.filter((a: any) => a.bank_name === bankFilter)
 

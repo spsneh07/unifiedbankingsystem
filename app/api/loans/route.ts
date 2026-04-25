@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const cookieStore = await cookies();
     const role = cookieStore.get('ub_role')?.value;
@@ -19,11 +19,16 @@ export async function GET() {
       `);
       return NextResponse.json(loans);
     } else {
-      let customerId = 1;
-      if (userId) {
+      const { searchParams } = new URL(request.url);
+      let customerId = searchParams.get('customerId');
+      
+      if (!customerId && userId) {
         const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
         if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
       }
+      
+      if (!customerId) return NextResponse.json([]);
+
       const loans = await query('SELECT * FROM loans WHERE customer_id = ? ORDER BY created_at DESC', [customerId]);
       return NextResponse.json(loans);
     }
@@ -40,10 +45,14 @@ export async function POST(request: Request) {
     const userId = cookieStore.get('ub_user_id')?.value;
 
     if (action === 'apply') {
-      let customerId = 1;
+      let customerId = null;
       if (userId) {
         const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
         if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+      }
+
+      if (!customerId) {
+        return NextResponse.json({ success: false, error: 'Customer session not found' }, { status: 401 });
       }
 
       if (!amount || !tenure || !interest_rate) {

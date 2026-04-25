@@ -33,18 +33,23 @@ async function autoExecuteScheduledTransactions() {
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('ub_user_id')?.value;
+    const { searchParams } = new URL(request.url);
+    let customerId = searchParams.get('customerId');
     
+    if (!customerId) {
+      const cookieStore = await cookies();
+      const userId = cookieStore.get('ub_user_id')?.value;
+      if (userId) {
+        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
+        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+      }
+    }
+
     await autoExecuteScheduledTransactions();
 
-    let customerId = 1;
-    if (userId) {
-      const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
-      if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
-    }
+    if (!customerId) return NextResponse.json([]);
 
     const scheduled = await query(`
       SELECT st.*, a.account_no

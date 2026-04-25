@@ -7,15 +7,23 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get('customerId');
+    let customerId = searchParams.get('customerId');
 
-    const params: any[] = [];
-    let whereClause = '';
-
-    if (customerId) {
-      whereClause = 'WHERE a.customer_id = ?';
-      params.push(customerId);
+    if (!customerId) {
+      const cookieStore = await cookies();
+      const userId = cookieStore.get('ub_user_id')?.value;
+      if (userId) {
+        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
+        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+      }
     }
+
+    if (!customerId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const params: any[] = [customerId];
+    const whereClause = 'WHERE a.customer_id = ?';
 
     const byCategory: any = await query(`
       SELECT

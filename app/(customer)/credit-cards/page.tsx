@@ -17,6 +17,7 @@ export default function CreditCardsPage() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [actionType, setActionType] = useState<'spend' | 'pay'>('spend');
   const [actionAmount, setActionAmount] = useState('');
+  const [applying, setApplying] = useState(false);
 
   const loadCards = () => {
     setLoading(true);
@@ -75,6 +76,28 @@ export default function CreditCardsPage() {
     }
   };
 
+  const handleApply = async () => {
+    setApplying(true);
+    try {
+      const res = await fetch('/api/credit-cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'apply', card_id: 0, amount: 0 })
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast('success', data.message);
+        loadCards();
+      } else {
+        toast('error', data.error || 'Application failed');
+      }
+    } catch (e) {
+      toast('error', 'Network error');
+    } finally {
+      setApplying(false);
+    }
+  };
+
   if (loading && cards.length === 0) {
     return <div className="p-6 text-black dark:text-white">Loading credit cards...</div>;
   }
@@ -86,6 +109,13 @@ export default function CreditCardsPage() {
           <h1 className="text-2xl font-display font-800 text-black dark:text-white">Credit Cards</h1>
           <p className="text-[14px] text-[#8890a0] mt-1">Manage your credit lines and pay bills</p>
         </div>
+        <button 
+          onClick={handleApply}
+          disabled={applying}
+          className="btn-primary flex items-center gap-2"
+        >
+          {applying ? 'Applying...' : <><CreditCard size={18} /> Apply for New Card</>}
+        </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

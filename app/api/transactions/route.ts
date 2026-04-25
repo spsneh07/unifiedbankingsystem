@@ -1,30 +1,33 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const customerId = searchParams.get('customerId');
+    let customerId = searchParams.get('customerId');
 
-    let transactions;
-    if (customerId) {
-      transactions = await query(`
-        SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, a.account_no as account_number 
-        FROM transactions t 
-        LEFT JOIN accounts a ON t.account_id = a.account_id
-        WHERE a.customer_id = ?
-        ORDER BY t.created_at DESC
-      `, [customerId]);
-    } else {
-      transactions = await query(`
-        SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, a.account_no as account_number 
-        FROM transactions t 
-        LEFT JOIN accounts a ON t.account_id = a.account_id
-        ORDER BY t.created_at DESC
-      `);
+    if (!customerId) {
+      const cookieStore = await cookies();
+      const userId = cookieStore.get('ub_user_id')?.value;
+      if (userId) {
+        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
+        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
+      }
     }
+
+    if (!customerId) return NextResponse.json([]);
+
+    const transactions = await query(`
+      SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, a.account_no as account_number 
+      FROM transactions t 
+      LEFT JOIN accounts a ON t.account_id = a.account_id
+      WHERE a.customer_id = ?
+      ORDER BY t.created_at DESC
+    `, [customerId]);
+    
     return NextResponse.json(transactions);
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
