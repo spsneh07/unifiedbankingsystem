@@ -37,11 +37,12 @@ export default function AnalyticsPage() {
 
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
-    fetch('/api/analytics', { cache: 'no-store' })
+    if (!user?.customer_id) return;
+    fetch(`/api/analytics?customerId=${user.customer_id}`, { cache: 'no-store' })
       .then(r => r.json())
       .then(res => { if (res.success) setData(res.data); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [user?.id])
+  }, [user?.customer_id])
 
   if (loading) return (
     <div className="p-6 space-y-6">

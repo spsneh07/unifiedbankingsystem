@@ -22,11 +22,12 @@ export default function DashboardPage() {
 
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
-    fetch('/api/dashboard', { cache: 'no-store' })
+    if (!user?.customer_id) return;
+    fetch(`/api/dashboard?customerId=${user.customer_id}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(res => { if (res.success) setData(res.data); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [user?.id])
+  }, [user?.customer_id])
 
   if (loading || !data) return <div className="p-6 text-white">Loading...</div>
 

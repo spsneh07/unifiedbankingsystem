@@ -3,29 +3,64 @@ import { query } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const [balanceResult]: any = await query('SELECT SUM(balance) as totalBalance FROM accounts');
-    const [accountsResult]: any = await query('SELECT COUNT(*) as totalAccounts FROM accounts');
-    const [customersResult]: any = await query('SELECT COUNT(*) as totalCustomers FROM customers');
-    
-    const fraudAlerts: any = await query(`
-      SELECT t.*, a.account_number as account_no 
-      FROM transactions t 
-      LEFT JOIN accounts a ON t.account_id = a.id
-      WHERE amount > (SELECT AVG(amount)*3 FROM transactions)
-    `);
+    const { searchParams } = new URL(request.url);
+    const customerId = searchParams.get('customerId');
 
-    const recentTx: any = await query(`
-      SELECT t.id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
-      FROM transactions t
-      LEFT JOIN accounts a ON t.account_id = a.id
-      ORDER BY t.created_at DESC LIMIT 8
-    `);
+    let balanceResult, accountsResult, customersResult, fraudAlerts, recentTx, myAccounts;
 
-    const myAccounts: any = await query(`
-      SELECT id, account_number as account_no, balance, type, status FROM accounts LIMIT 3
-    `);
+    if (customerId) {
+      const [b]: any = await query('SELECT SUM(balance) as totalBalance FROM accounts WHERE customer_id = ?', [customerId]);
+      balanceResult = b;
+      const [a]: any = await query('SELECT COUNT(*) as totalAccounts FROM accounts WHERE customer_id = ?', [customerId]);
+      accountsResult = a;
+      customersResult = { totalCustomers: 1 };
+      
+      fraudAlerts = await query(`
+        SELECT t.*, a.account_number as account_no 
+        FROM transactions t 
+        LEFT JOIN accounts a ON t.account_id = a.id
+        WHERE amount > (SELECT AVG(amount)*3 FROM transactions) AND a.customer_id = ?
+      `, [customerId]);
+
+      recentTx = await query(`
+        SELECT t.id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
+        FROM transactions t
+        LEFT JOIN accounts a ON t.account_id = a.id
+        WHERE a.customer_id = ?
+        ORDER BY t.created_at DESC LIMIT 8
+      `, [customerId]);
+
+      myAccounts = await query(`
+        SELECT id, account_number as account_no, balance, type, status FROM accounts WHERE customer_id = ? LIMIT 3
+      `, [customerId]);
+    } else {
+      const [b]: any = await query('SELECT SUM(balance) as totalBalance FROM accounts');
+      balanceResult = b;
+      const [a]: any = await query('SELECT COUNT(*) as totalAccounts FROM accounts');
+      accountsResult = a;
+      const [c]: any = await query('SELECT COUNT(*) as totalCustomers FROM customers');
+      customersResult = c;
+      
+      fraudAlerts = await query(`
+        SELECT t.*, a.account_number as account_no 
+        FROM transactions t 
+        LEFT JOIN accounts a ON t.account_id = a.id
+        WHERE amount > (SELECT AVG(amount)*3 FROM transactions)
+      `);
+
+      recentTx = await query(`
+        SELECT t.id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
+        FROM transactions t
+        LEFT JOIN accounts a ON t.account_id = a.id
+        ORDER BY t.created_at DESC LIMIT 8
+      `);
+
+      myAccounts = await query(`
+        SELECT id, account_number as account_no, balance, type, status FROM accounts LIMIT 3
+      `);
+    }
 
     return NextResponse.json({
       success: true,

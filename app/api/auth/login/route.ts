@@ -14,7 +14,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const users: any = await query(
-      `SELECT id, email, password, role FROM users WHERE email = ?`,
+      `SELECT user_id as id, email, password_hash as password, role, customer_id 
+       FROM users 
+       WHERE email = ?`,
       [email]
     )
 
@@ -42,6 +44,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       id: user.id,
       email: user.email,
       role: user.role as 'admin' | 'employee' | 'customer',
+      customer_id: user.customer_id,
     }
 
     const response = NextResponse.json({ success: true, user: userData })

@@ -2,8 +2,9 @@
 import { useState, useEffect } from 'react'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
-import { mockAccounts, formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/mockData'
 import { Plus, AlertTriangle } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type TxType = 'deposit' | 'withdraw' | 'transfer'
 
@@ -14,19 +15,44 @@ function txBadge(type: string) {
 }
 
 export default function TransactionsPage() {
+  const router = useRouter()
   const [modal, setModal] = useState<TxType | null>(null)
   const [typeFilter, setTypeFilter] = useState('All')
   const [catFilter, setCatFilter] = useState('All')
   const [data, setData] = useState<any[]>([])
+  const [accounts, setAccounts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
+  // Form states
+  const [amount, setAmount] = useState('')
+  const [description, setDescription] = useState('')
+  const [fromAccount, setFromAccount] = useState('')
+  const [toAccount, setToAccount] = useState('')
+  const [category, setCategory] = useState('Other')
+  const [actionLoading, setActionLoading] = useState(false)
+  const [error, setError] = useState('')
+
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
-  useEffect(() => {
-    fetch('/api/transactions', { cache: 'no-store' }).then(r => r.json()).then(d => {
-      setData(d)
+  
+  const fetchData = () => {
+    if (!user?.customer_id) return;
+    Promise.all([
+      fetch(`/api/transactions?customerId=${user.customer_id}`, { cache: 'no-store' }).then(r => r.json()),
+      fetch(`/api/accounts?customerId=${user.customer_id}`, { cache: 'no-store' }).then(r => r.json())
+    ]).then(([txData, accData]) => {
+      setData(txData)
+      setAccounts(accData)
+      if (accData.length > 0) {
+        setFromAccount(accData[0].id)
+        setToAccount(accData[0].id)
+      }
       setLoading(false)
     })
-  }, [user?.id])
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [user?.customer_id])
 
   if (loading) return <div className="p-6 text-white">Loading...</div>
 
@@ -37,25 +63,59 @@ export default function TransactionsPage() {
     amount: parseFloat(t.amount),
     transaction_date: t.created_at,
     is_suspicious: parseFloat(t.amount) > 50000,
-    category: 'Other'
+    category: t.category || 'Other'
   }))
 
   let txs = mappedTransactions
   if (typeFilter !== 'All') txs = txs.filter(t => t.type === typeFilter)
   if (catFilter !== 'All') txs = txs.filter(t => t.category === catFilter)
 
+  const handleSubmit = async () => {
+    setError('');
+    setActionLoading(true);
+    
+    try {
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: modal,
+          amount: parseFloat(amount),
+          account_id: fromAccount,
+          receiver_account_id: modal === 'transfer' ? toAccount : undefined,
+          description,
+          category
+        })
+      });
+      const result = await res.json();
+      
+      if (result.success) {
+        setModal(null);
+        setAmount('');
+        setDescription('');
+        fetchData(); // Refresh data
+        router.refresh();
+      } else {
+        setError(result.error || 'Transaction failed');
+      }
+    } catch (e: any) {
+      setError(e.message || 'Transaction failed');
+    }
+    setActionLoading(false);
+  }
+
   return (
     <div className="p-6 space-y-5 animate-fade-in">
 
         {/* Action buttons */}
         <div className="flex flex-wrap gap-3">
-          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => setModal('deposit')}>
+          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => { setModal('deposit'); setError(''); }}>
             <Plus size={15} /> Deposit
           </button>
-          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(240,80,80,0.12)', color: '#f05050', border: '1px solid rgba(240,80,80,0.2)' }} onClick={() => setModal('withdraw')}>
+          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(240,80,80,0.12)', color: '#f05050', border: '1px solid rgba(240,80,80,0.2)' }} onClick={() => { setModal('withdraw'); setError(''); }}>
             Withdraw
           </button>
-          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(64,144,240,0.12)', color: '#4090f0', border: '1px solid rgba(64,144,240,0.2)' }} onClick={() => setModal('transfer')}>
+          <button className="flex items-center gap-2 text-sm px-5 py-2 rounded-lg font-display font-600 transition-all" style={{ background: 'rgba(64,144,240,0.12)', color: '#4090f0', border: '1px solid rgba(64,144,240,0.2)' }} onClick={() => { setModal('transfer'); setError(''); }}>
             Transfer
           </button>
           <div className="ml-auto flex gap-2">
@@ -89,7 +149,7 @@ export default function TransactionsPage() {
                 {txs.map(tx => (
                   <tr key={tx.transaction_id} className={`table-row ${tx.is_suspicious ? 'bg-red-950/10' : ''}`}>
                     <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">#{tx.transaction_id}</td>
-                    <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{tx.account_no.slice(-8)}</td>
+                    <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{tx.account_no?.slice(-8) || '-'}</td>
                     <td className="px-5 py-3 text-white">{tx.description}</td>
                     <td className="px-5 py-3">{txBadge(tx.type)}</td>
                     <td className="px-5 py-3">
@@ -119,30 +179,33 @@ export default function TransactionsPage() {
         {/* Deposit Modal */}
         <Modal open={modal === 'deposit'} onClose={() => setModal(null)} title="Deposit Funds">
           <div className="space-y-4">
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Account</label>
-              <select className="input text-sm">
-                {mockAccounts.filter(a => a.status === 'active').map(a => (
-                  <option key={a.account_id}>{a.account_no} — {a.bank_name} ({formatCurrency(a.balance)})</option>
+              <select className="input text-sm" value={fromAccount} onChange={(e) => setFromAccount(e.target.value)}>
+                {accounts.filter(a => a.status === 'active').map(a => (
+                  <option key={a.id} value={a.id}>{a.account_number} ({formatCurrency(a.balance)})</option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Amount (₹)</label>
-              <input className="input text-sm" type="number" placeholder="Enter amount" />
+              <input className="input text-sm" type="number" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Description</label>
-              <input className="input text-sm" placeholder="e.g. Salary credit" />
+              <input className="input text-sm" placeholder="e.g. Salary credit" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Category</label>
-              <select className="input text-sm">
-                {['Other', 'Food', 'Travel', 'Shopping', 'Bills', 'Entertainment', 'Healthcare'].map(c => <option key={c}>{c}</option>)}
+              <select className="input text-sm" value={category} onChange={(e) => setCategory(e.target.value)}>
+                {['Income', 'Other'].map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
             <div className="flex gap-3 pt-2">
-              <button className="btn-primary flex-1 text-sm">Confirm Deposit</button>
+              <button className="btn-primary flex-1 text-sm flex justify-center items-center" onClick={handleSubmit} disabled={actionLoading}>
+                {actionLoading ? 'Processing...' : 'Confirm Deposit'}
+              </button>
               <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)}>Cancel</button>
             </div>
           </div>
@@ -151,27 +214,30 @@ export default function TransactionsPage() {
         {/* Withdraw Modal */}
         <Modal open={modal === 'withdraw'} onClose={() => setModal(null)} title="Withdraw Funds">
           <div className="space-y-4">
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Account</label>
-              <select className="input text-sm">
-                {mockAccounts.filter(a => a.status === 'active').map(a => (
-                  <option key={a.account_id}>{a.account_no} — {a.bank_name} ({formatCurrency(a.balance)})</option>
+              <select className="input text-sm" value={fromAccount} onChange={(e) => setFromAccount(e.target.value)}>
+                {accounts.filter(a => a.status === 'active').map(a => (
+                  <option key={a.id} value={a.id}>{a.account_number} ({formatCurrency(a.balance)})</option>
                 ))}
               </select>
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Amount (₹)</label>
-              <input className="input text-sm" type="number" placeholder="Enter amount" />
+              <input className="input text-sm" type="number" placeholder="Enter amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Description</label>
-              <input className="input text-sm" placeholder="e.g. ATM withdrawal" />
+              <input className="input text-sm" placeholder="e.g. ATM withdrawal" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="p-3 rounded-lg bg-[#f05050]/10 border border-[#f05050]/20 text-[12px] text-[#f05050]">
               ⚠ Withdrawal over ₹50,000 will trigger a high transaction alert.
             </div>
             <div className="flex gap-3 pt-2">
-              <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600" style={{ background: 'rgba(240,80,80,0.15)', color: '#f05050', border: '1px solid rgba(240,80,80,0.3)' }}>Confirm Withdrawal</button>
+              <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600 flex justify-center items-center disabled:opacity-50" style={{ background: 'rgba(240,80,80,0.15)', color: '#f05050', border: '1px solid rgba(240,80,80,0.3)' }} onClick={handleSubmit} disabled={actionLoading}>
+                {actionLoading ? 'Processing...' : 'Confirm Withdrawal'}
+              </button>
               <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)}>Cancel</button>
             </div>
           </div>
@@ -180,32 +246,31 @@ export default function TransactionsPage() {
         {/* Transfer Modal */}
         <Modal open={modal === 'transfer'} onClose={() => setModal(null)} title="Transfer Funds">
           <div className="space-y-4">
+            {error && <div className="text-red-500 text-sm">{error}</div>}
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">From Account</label>
-              <select className="input text-sm">
-                {mockAccounts.filter(a => a.status === 'active').map(a => (
-                  <option key={a.account_id}>{a.account_no} — {a.bank_name} ({formatCurrency(a.balance)})</option>
+              <select className="input text-sm" value={fromAccount} onChange={(e) => setFromAccount(e.target.value)}>
+                {accounts.filter(a => a.status === 'active').map(a => (
+                  <option key={a.id} value={a.id}>{a.account_number} ({formatCurrency(a.balance)})</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">To Account</label>
-              <select className="input text-sm">
-                {mockAccounts.filter(a => a.status === 'active').map(a => (
-                  <option key={a.account_id}>{a.account_no} — {a.bank_name}</option>
-                ))}
-              </select>
+              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">To Account (Account ID)</label>
+              <input className="input text-sm" type="number" placeholder="Enter recipient Account ID" value={toAccount} onChange={(e) => setToAccount(e.target.value)} />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Amount (₹)</label>
-              <input className="input text-sm" type="number" placeholder="Enter transfer amount" />
+              <input className="input text-sm" type="number" placeholder="Enter transfer amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Description</label>
-              <input className="input text-sm" placeholder="e.g. Rent payment" />
+              <input className="input text-sm" placeholder="e.g. Rent payment" value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="flex gap-3 pt-2">
-              <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600 bg-[#4090f0]/15 text-[#4090f0] border border-[#4090f0]/30">Confirm Transfer</button>
+              <button className="flex-1 text-sm px-5 py-2 rounded-lg font-display font-600 bg-[#4090f0]/15 text-[#4090f0] border border-[#4090f0]/30 flex justify-center items-center disabled:opacity-50" onClick={handleSubmit} disabled={actionLoading}>
+                {actionLoading ? 'Processing...' : 'Confirm Transfer'}
+              </button>
               <button className="btn-ghost flex-1 text-sm" onClick={() => setModal(null)}>Cancel</button>
             </div>
           </div>
@@ -215,4 +280,3 @@ export default function TransactionsPage() {
     
   )
 }
-

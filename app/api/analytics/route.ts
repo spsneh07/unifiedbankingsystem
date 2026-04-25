@@ -4,21 +4,15 @@ import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies();
-    const userId = cookieStore.get('ub_user_id')?.value;
-    const role = cookieStore.get('ub_role')?.value;
+    const { searchParams } = new URL(request.url);
+    const customerId = searchParams.get('customerId');
 
     let customerFilter = '';
     const params: any[] = [];
 
-    if (role === 'customer') {
-      let customerId = 1;
-      if (userId) {
-        const userRes: any = await query('SELECT id as customer_id FROM customers WHERE user_id = ?', [userId]);
-        if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
-      }
+    if (customerId) {
       customerFilter = 'WHERE a.customer_id = ?';
       params.push(customerId);
     }
