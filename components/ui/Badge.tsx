@@ -1,4 +1,4 @@
-type Variant = 'green' | 'red' | 'yellow' | 'blue' | 'gray'
+export type Variant = 'green' | 'red' | 'yellow' | 'blue' | 'gray'
 
 const map: Record<Variant, string> = {
   green: 'badge-green',
@@ -8,6 +8,6 @@ const map: Record<Variant, string> = {
   gray: 'badge-gray',
 }
 
-export default function Badge({ children, variant = 'gray' }: { children: React.ReactNode; variant?: Variant }) {
-  return <span className={`badge ${map[variant]}`}>{children}</span>
+export default function Badge({ children, variant = 'gray', className = '' }: { children: React.ReactNode; variant?: Variant; className?: string }) {
+  return <span className={`badge ${map[variant]} ${className}`.trim()}>{children}</span>
 }

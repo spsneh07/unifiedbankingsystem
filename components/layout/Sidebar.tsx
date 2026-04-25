@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Users, CreditCard, ArrowLeftRight,
   BarChart2, ShieldAlert, Clock, GitBranch, Terminal,
@@ -8,23 +8,33 @@ import {
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { mockAlerts } from '@/lib/mockData'
+import { clearSession, getSession } from '@/lib/auth'
 
-const nav = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/customers', icon: Users, label: 'Customers' },
-  { href: '/accounts', icon: CreditCard, label: 'Accounts' },
-  { href: '/transactions', icon: ArrowLeftRight, label: 'Transactions' },
-  { href: '/analytics', icon: BarChart2, label: 'Analytics' },
-  { href: '/fraud', icon: ShieldAlert, label: 'Fraud Detection' },
-  { href: '/scheduled', icon: Clock, label: 'Scheduled' },
-  { href: '/branches', icon: GitBranch, label: 'Branches' },
-  { href: '/query-dashboard', icon: Terminal, label: 'Query Dashboard' },
+const allNav = [
+  { href: '/dashboard',       icon: LayoutDashboard, label: 'Dashboard',       roles: ['admin','employee','customer'] },
+  { href: '/customers',       icon: Users,            label: 'Customers',       roles: ['admin','employee'] },
+  { href: '/accounts',        icon: CreditCard,       label: 'Accounts',        roles: ['admin','employee','customer'] },
+  { href: '/transactions',    icon: ArrowLeftRight,   label: 'Transactions',    roles: ['admin','employee','customer'] },
+  { href: '/analytics',       icon: BarChart2,        label: 'Analytics',       roles: ['admin','employee','customer'] },
+  { href: '/fraud',           icon: ShieldAlert,      label: 'Fraud Detection', roles: ['admin','employee'] },
+  { href: '/scheduled',       icon: Clock,            label: 'Scheduled',       roles: ['admin','employee','customer'] },
+  { href: '/branches',        icon: GitBranch,        label: 'Branches',        roles: ['admin'] },
+  { href: '/query-dashboard', icon: Terminal,         label: 'Query Dashboard', roles: ['admin'] },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router = useRouter()
   const [collapsed, setCollapsed] = useState(false)
   const [unreadAlerts, setUnreadAlerts] = useState(0)
+  const session = getSession()
+  const role = session?.role || 'customer'
+  const nav = allNav.filter(item => item.roles.includes(role))
+
+  const handleLogout = () => {
+    clearSession()
+    router.push('/')
+  }
 
   useEffect(() => {
     fetch('/api/alerts')
@@ -38,16 +48,16 @@ export default function Sidebar() {
   return (
     <aside
       style={{ width: collapsed ? 64 : 240, minWidth: collapsed ? 64 : 240 }}
-      className="sticky top-0 h-screen bg-[#0d0f14] border-r border-[#1a1d24] flex flex-col transition-all duration-300 overflow-hidden"
+      className="sticky top-0 h-screen bg-gray-50 dark:bg-[#0d0f14] border-r border-gray-200 dark:border-[#1a1d24] flex flex-col transition-all duration-300 overflow-hidden"
     >
       {/* Logo */}
-      <div className="flex items-center justify-between px-4 py-5 border-b border-[#1a1d24]">
+      <div className="flex items-center justify-between px-4 py-5 border-b border-gray-200 dark:border-[#1a1d24]">
         {!collapsed && (
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
               <Landmark size={16} className="text-[#0a0c10]" />
             </div>
-            <span className="font-display font-700 text-[15px] tracking-wide text-white">NexusBank</span>
+            <span className="font-display font-700 text-[15px] tracking-wide text-black dark:text-white">NexusBank</span>
           </div>
         )}
         {collapsed && (
@@ -57,7 +67,7 @@ export default function Sidebar() {
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="text-[#3d4455] hover:text-white transition-colors ml-auto"
+          className="text-[#3d4455] hover:text-black dark:text-white transition-colors ml-auto"
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
         </button>
@@ -82,17 +92,17 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[#1a1d24] p-3 space-y-1">
+      <div className="border-t border-gray-200 dark:border-[#1a1d24] p-3 space-y-1">
         <Link href="/alerts" className={`sidebar-link ${collapsed ? 'justify-center px-0' : ''}`} title={collapsed ? 'Alerts' : undefined}>
           <div className="relative flex-shrink-0">
             <Bell size={18} />
             {unreadAlerts > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-[9px] flex items-center justify-center text-white font-bold">{unreadAlerts}</span>
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-danger rounded-full text-[9px] flex items-center justify-center text-black dark:text-white font-bold">{unreadAlerts}</span>
             )}
           </div>
           {!collapsed && <span>Alerts <span className="ml-auto badge badge-red">{unreadAlerts}</span></span>}
         </Link>
-        <button className={`sidebar-link w-full ${collapsed ? 'justify-center px-0' : ''}`}>
+        <button onClick={handleLogout} className={`sidebar-link w-full ${collapsed ? 'justify-center px-0' : ''} text-[#f05050] hover:text-[#f05050]`}>
           <LogOut size={18} className="flex-shrink-0" />
           {!collapsed && <span>Logout</span>}
         </button>

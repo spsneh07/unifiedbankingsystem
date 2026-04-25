@@ -1,44 +1,58 @@
-@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap");
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-display: 'Syne', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: "Syne", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
-  background-color: #0a0c10;
-  color: #e8eaf0;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
 }
 
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: #111318; }
-::-webkit-scrollbar-thumb { background: #2c313c; border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: #3d4455; }
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #111318;
+}
+::-webkit-scrollbar-thumb {
+  background: #2c313c;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3d4455;
+}
 
-.font-display { font-family: var(--font-display); }
-.font-mono { font-family: var(--font-mono); }
+.font-display {
+  font-family: var(--font-display);
+}
+.font-mono {
+  font-family: var(--font-mono);
+}
 
 .card {
-  background: #111318;
-  border: 1px solid #1a1d24;
-  border-radius: 12px;
+  @apply bg-white dark:bg-[#111318] border border-gray-200 dark:border-[#1a1d24] rounded-xl;
 }
 
 .card-hover {
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 .card-hover:hover {
-  border-color: rgba(0,212,170,0.3);
-  box-shadow: 0 0 20px rgba(0,212,170,0.05);
+  border-color: rgba(0, 212, 170, 0.3);
+  box-shadow: 0 0 20px rgba(0, 212, 170, 0.05);
 }
 
 .btn-primary {
@@ -48,12 +62,19 @@ body {
   font-weight: 600;
   border-radius: 8px;
   padding: 8px 20px;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
   border: none;
   cursor: pointer;
 }
-.btn-primary:hover { background: #00a882; transform: translateY(-1px); }
-.btn-primary:active { transform: translateY(0); }
+.btn-primary:hover {
+  background: #00a882;
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
 
 .btn-ghost {
   background: transparent;
@@ -62,11 +83,16 @@ body {
   font-weight: 500;
   border-radius: 8px;
   padding: 8px 20px;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   border: 1px solid #22262f;
   cursor: pointer;
 }
-.btn-ghost:hover { background: #1a1d24; color: #e8eaf0; }
+.btn-ghost:hover {
+  background: #1a1d24;
+  color: #e8eaf0;
+}
 
 .badge {
   display: inline-flex;
@@ -78,11 +104,26 @@ body {
   font-family: var(--font-display);
   letter-spacing: 0.05em;
 }
-.badge-green { background: rgba(0,212,170,0.12); color: #00d4aa; }
-.badge-red { background: rgba(240,80,80,0.12); color: #f05050; }
-.badge-yellow { background: rgba(240,192,64,0.12); color: #f0c040; }
-.badge-blue { background: rgba(64,144,240,0.12); color: #4090f0; }
-.badge-gray { background: rgba(96,104,128,0.15); color: #8890a0; }
+.badge-green {
+  background: rgba(0, 212, 170, 0.12);
+  color: #00d4aa;
+}
+.badge-red {
+  background: rgba(240, 80, 80, 0.12);
+  color: #f05050;
+}
+.badge-yellow {
+  background: rgba(240, 192, 64, 0.12);
+  color: #f0c040;
+}
+.badge-blue {
+  background: rgba(64, 144, 240, 0.12);
+  color: #4090f0;
+}
+.badge-gray {
+  background: rgba(96, 104, 128, 0.15);
+  color: #8890a0;
+}
 
 .input {
   background: #1a1d24;
@@ -96,19 +137,31 @@ body {
   transition: border-color 0.2s;
   outline: none;
 }
-.input:focus { border-color: #00d4aa; }
-.input::placeholder { color: #3d4455; }
+.input:focus {
+  border-color: #00d4aa;
+}
+.input::placeholder {
+  color: #3d4455;
+}
 
-select.input { cursor: pointer; }
+select.input {
+  cursor: pointer;
+}
 
 .table-row {
   border-bottom: 1px solid #1a1d24;
   transition: background 0.15s;
 }
-.table-row:hover { background: #111318; }
+.table-row:hover {
+  background: #111318;
+}
 
-.glow-accent { box-shadow: 0 0 30px rgba(0,212,170,0.12); }
-.glow-gold { box-shadow: 0 0 30px rgba(240,192,64,0.12); }
+.glow-accent {
+  box-shadow: 0 0 30px rgba(0, 212, 170, 0.12);
+}
+.glow-gold {
+  box-shadow: 0 0 30px rgba(240, 192, 64, 0.12);
+}
 
 .sidebar-link {
   display: flex;
@@ -124,13 +177,25 @@ select.input { cursor: pointer; }
   cursor: pointer;
   text-decoration: none;
 }
-.sidebar-link:hover { background: #1a1d24; color: #e8eaf0; }
-.sidebar-link.active { background: rgba(0,212,170,0.1); color: #00d4aa; }
-.sidebar-link.active svg { color: #00d4aa; }
+.sidebar-link:hover {
+  background: #1a1d24;
+  color: #e8eaf0;
+}
+.sidebar-link.active {
+  background: rgba(0, 212, 170, 0.1);
+  color: #00d4aa;
+}
+.sidebar-link.active svg {
+  color: #00d4aa;
+}
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 .skeleton {
   background: linear-gradient(90deg, #1a1d24 25%, #22262f 50%, #1a1d24 75%);
@@ -143,7 +208,7 @@ select.input { cursor: pointer; }
   position: relative;
 }
 .noise::before {
-  content: '';
+  content: "";
   position: absolute;
   inset: 0;
   opacity: 0.03;
@@ -164,8 +229,19 @@ select.input { cursor: pointer; }
   white-space: pre;
 }
 
-.sql-keyword { color: #f0c040; }
-.sql-function { color: #00d4aa; }
-.sql-string { color: #4090f0; }
-.sql-comment { color: #4a5060; font-style: italic; }
-.sql-number { color: #f06040; }
+.sql-keyword {
+  color: #f0c040;
+}
+.sql-function {
+  color: #00d4aa;
+}
+.sql-string {
+  color: #4090f0;
+}
+.sql-comment {
+  color: #4a5060;
+  font-style: italic;
+}
+.sql-number {
+  color: #f06040;
+}

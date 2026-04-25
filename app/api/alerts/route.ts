@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const alerts = await query(`
@@ -8,7 +10,6 @@ export async function GET() {
       ORDER BY created_at DESC
     `);
     
-    // Also get the unread count
     const [countResult]: any = await query(`
       SELECT COUNT(*) as count FROM alerts WHERE is_read = FALSE
     `);

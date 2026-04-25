@@ -1,0 +1,10 @@
+{
+  "css.customData": [],
+  "css.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "tailwindCSS.includeLanguages": {
+    "plaintext": "ts",
+    "typescript": "ts",
+    "typescriptreact": "tsx"
+  }
+}

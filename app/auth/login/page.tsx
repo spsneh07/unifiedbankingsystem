@@ -2,12 +2,13 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Landmark, Eye, EyeOff } from 'lucide-react'
+import { saveSession, getDashboardByRole } from '@/lib/auth'
 
 export default function LoginPage() {
   const router = useRouter()
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('admin@nexusbank.in')
+  const [email, setEmail] = useState('admin@bank.com')
   const [password, setPassword] = useState('password123')
   const [error, setError] = useState('')
 
@@ -22,12 +23,13 @@ export default function LoginPage() {
       })
       const data = await res.json()
       if (data.success) {
-        // Ideally set auth context or cookie, then redirect
-        router.push('/dashboard')
+        saveSession(data.user)
+        router.replace(getDashboardByRole(data.user.role))
+        router.refresh()
       } else {
         setError(data.error || 'Login failed')
       }
-    } catch (e) {
+    } catch {
       setError('An error occurred during login')
     }
     setLoading(false)
@@ -104,8 +106,8 @@ export default function LoginPage() {
           <div className="pt-2 border-t border-[#1a1d24]">
             <p className="text-[11px] text-[#8890a0] text-center mb-2">Demo credentials</p>
             <div className="grid grid-cols-3 gap-2">
-              {[{ role: 'Admin', email: 'admin@nexusbank.com' }, { role: 'Employee', email: 'emp@nexusbank.in' }, { role: 'Customer', email: 'customer@nexusbank.com' }].map(d => (
-                <div key={d.role} className="bg-[#1a1d24] rounded-lg p-2 text-center cursor-pointer" onClick={() => { setEmail(d.email); setPassword(d.role === 'Admin' ? 'admin' : 'password'); }}>
+              {[{ role: 'Admin', email: 'admin@bank.com', pw: 'password123' }, { role: 'Employee', email: 'employee@bank.com', pw: 'password123' }, { role: 'Customer', email: 'arjun.mehta@gmail.com', pw: 'password123' }].map(d => (
+                <div key={d.role} className="bg-[#1a1d24] rounded-lg p-2 text-center cursor-pointer" onClick={() => { setEmail(d.email); setPassword(d.pw); }}>
                   <p className="text-[10px] font-display font-700 text-accent">{d.role}</p>
                   <p className="text-[10px] text-[#8890a0] truncate">{d.email}</p>
                 </div>
