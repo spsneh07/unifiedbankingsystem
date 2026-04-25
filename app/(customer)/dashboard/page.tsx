@@ -55,7 +55,18 @@ export default function DashboardPage() {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((acc: any) => <AccountCard key={acc.id} account={{ ...acc, account_id: acc.id, bank_name: acc.type === 'checking' ? 'Checking' : 'Savings', balance: parseFloat(acc.balance), account_no: acc.account_number }} />)}
+          {filtered.map((acc: any) => (
+            <AccountCard
+              key={acc.id}
+              account={{
+                ...acc,
+                account_id: acc.id,
+                bank_name: acc.type === 'checking' ? 'Checking' : 'Savings',
+                balance: parseFloat(acc.balance),
+                account_no: acc.account_no,
+              }}
+            />
+          ))}
         </div>
       </div>
 
@@ -87,7 +98,9 @@ export default function DashboardPage() {
                 <div className="flex items-start gap-3">
                   <span className="mt-1.5 w-2 h-2 rounded-full flex-shrink-0 bg-danger" />
                   <div className="flex-1">
-                    <p className="text-[13px] text-[#e8eaf0] leading-snug">Suspicious on {alert.account_number} — {formatCurrency(parseFloat(alert.amount))}</p>
+                    <p className="text-[13px] text-[#e8eaf0] leading-snug">
+                      Suspicious on {alert.account_no} — {formatCurrency(parseFloat(alert.amount))}
+                    </p>
                     <p className="text-[11px] text-[#8890a0] mt-1">{new Date(alert.created_at).toLocaleDateString('en-IN')}</p>
                   </div>
                 </div>

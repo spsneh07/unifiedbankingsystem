@@ -22,6 +22,16 @@ export async function initDb() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(255) NOT NULL,
+      token VARCHAR(255) NOT NULL,
+      expires_at DATETIME NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_password_resets_email (email),
+      INDEX idx_password_resets_token (token)
+    );
+
     CREATE TABLE IF NOT EXISTS customers (
       id INT AUTO_INCREMENT PRIMARY KEY,
       user_id INT,
@@ -78,6 +88,10 @@ export async function initDb() {
   for (const stmt of statements) {
     await connection.query(stmt);
   }
+
+  try {
+    await connection.query('ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NULL');
+  } catch {}
 
   // Insert mock data if empty
   const [users]: any = await connection.query('SELECT COUNT(*) as count FROM users');

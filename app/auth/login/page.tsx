@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Landmark, Eye, EyeOff } from 'lucide-react'
 import { saveSession, getDashboardByRole } from '@/lib/auth'
 
@@ -84,7 +85,9 @@ export default function LoginPage() {
               <input type="checkbox" className="w-3.5 h-3.5 rounded accent-[#00d4aa]" defaultChecked />
               <span className="text-[#8890a0]">Remember me</span>
             </label>
-            <a href="#" className="text-accent hover:underline">Forgot password?</a>
+            <Link href="/forgot-password" className="text-accent hover:underline">
+              Forgot password?
+            </Link>
           </div>
 
           <button

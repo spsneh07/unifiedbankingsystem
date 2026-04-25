@@ -21,7 +21,7 @@ export async function GET() {
     } else {
       let customerId = 1;
       if (userId) {
-        const userRes: any = await query('SELECT id as customer_id FROM customers WHERE user_id = ?', [userId]);
+        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
         if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
       }
       const loans = await query('SELECT * FROM loans WHERE customer_id = ? ORDER BY created_at DESC', [customerId]);
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     if (action === 'apply') {
       let customerId = 1;
       if (userId) {
-        const userRes: any = await query('SELECT id as customer_id FROM customers WHERE user_id = ?', [userId]);
+        const userRes: any = await query('SELECT customer_id FROM users WHERE user_id = ?', [userId]);
         if (userRes.length && userRes[0].customer_id) customerId = userRes[0].customer_id;
       }
 

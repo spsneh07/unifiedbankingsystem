@@ -18,22 +18,22 @@ export async function GET(request: Request) {
       customersResult = { totalCustomers: 1 };
       
       fraudAlerts = await query(`
-        SELECT t.*, a.account_number as account_no 
+        SELECT t.*, a.account_no as account_no 
         FROM transactions t 
-        LEFT JOIN accounts a ON t.account_id = a.id
+        LEFT JOIN accounts a ON t.account_id = a.account_id
         WHERE amount > (SELECT AVG(amount)*3 FROM transactions) AND a.customer_id = ?
       `, [customerId]);
 
       recentTx = await query(`
-        SELECT t.id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
+        SELECT t.transaction_id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_no as account_no
         FROM transactions t
-        LEFT JOIN accounts a ON t.account_id = a.id
+        LEFT JOIN accounts a ON t.account_id = a.account_id
         WHERE a.customer_id = ?
         ORDER BY t.created_at DESC LIMIT 8
       `, [customerId]);
 
       myAccounts = await query(`
-        SELECT id, account_number as account_no, balance, type, status FROM accounts WHERE customer_id = ? LIMIT 3
+        SELECT account_id as id, account_no as account_no, balance, account_type as type, status FROM accounts WHERE customer_id = ? LIMIT 3
       `, [customerId]);
     } else {
       const [b]: any = await query('SELECT SUM(balance) as totalBalance FROM accounts');
@@ -44,21 +44,21 @@ export async function GET(request: Request) {
       customersResult = c;
       
       fraudAlerts = await query(`
-        SELECT t.*, a.account_number as account_no 
+        SELECT t.*, a.account_no as account_no 
         FROM transactions t 
-        LEFT JOIN accounts a ON t.account_id = a.id
+        LEFT JOIN accounts a ON t.account_id = a.account_id
         WHERE amount > (SELECT AVG(amount)*3 FROM transactions)
       `);
 
       recentTx = await query(`
-        SELECT t.id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
+        SELECT t.transaction_id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_no as account_no
         FROM transactions t
-        LEFT JOIN accounts a ON t.account_id = a.id
+        LEFT JOIN accounts a ON t.account_id = a.account_id
         ORDER BY t.created_at DESC LIMIT 8
       `);
 
       myAccounts = await query(`
-        SELECT id, account_number as account_no, balance, type, status FROM accounts LIMIT 3
+        SELECT account_id as id, account_no as account_no, balance, account_type as type, status FROM accounts LIMIT 3
       `);
     }
 

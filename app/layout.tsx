@@ -15,7 +15,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body className="bg-white text-black dark:bg-[#0b0f14] dark:text-white">
         <ToastProvider>{children}</ToastProvider>
       </body>

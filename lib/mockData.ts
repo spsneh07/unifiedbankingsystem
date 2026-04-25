@@ -149,5 +149,9 @@ export const suspiciousTransactions = mockTransactions.filter(t => t.is_suspicio
 export const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(amount);
 
-export const maskAccountNo = (no: string) =>
-  no.slice(0, 4) + '****' + no.slice(-4);
+export const maskAccountNo = (no?: string | null) => {
+  if (!no) return ''
+  const s = String(no)
+  if (s.length <= 8) return s
+  return s.slice(0, 4) + '****' + s.slice(-4)
+}
