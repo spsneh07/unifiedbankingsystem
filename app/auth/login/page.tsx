@@ -102,7 +102,7 @@ export default function LoginPage() {
 
           <div className="text-center">
             <span className="text-[12px] text-[#8890a0]">No account? </span>
-            <a href="/signup" className="text-[12px] text-accent hover:underline">Create one</a>
+            <Link href="/auth/signup" className="text-[12px] text-accent hover:underline">Create one</Link>
           </div>
 
           {/* Demo credentials */}
