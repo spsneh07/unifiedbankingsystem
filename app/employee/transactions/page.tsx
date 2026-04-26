@@ -90,7 +90,7 @@ export default function TransactionsPage() {
                 {txs.map(tx => (
                   <tr key={tx.transaction_id} className={`table-row ${tx.is_suspicious ? 'bg-red-950/10' : ''}`}>
                     <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">#{tx.transaction_id}</td>
-                    <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{tx.account_no.slice(-8)}</td>
+                    <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{String(tx.account_no || '').slice(-8)}</td>
                     <td className="px-5 py-3 text-white">{tx.description}</td>
                     <td className="px-5 py-3">{txBadge(tx.type)}</td>
                     <td className="px-5 py-3">

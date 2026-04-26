@@ -1,6 +1,6 @@
-"use client";
 import { Bell, Search, Moon, Sun, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
 import { getSession, clearSession, type SessionUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
@@ -43,7 +43,7 @@ export default function Header({ title }: { title?: string }) {
   };
 
   const initials =
-    mounted && session?.email ? session.email.slice(0, 2).toUpperCase() : "UB";
+    mounted && session?.email ? String(session.email).slice(0, 2).toUpperCase() : "UB";
   const badgeColor =
     mounted && session?.role
       ? ROLE_COLORS[session.role] || "#00d4aa"
@@ -52,11 +52,19 @@ export default function Header({ title }: { title?: string }) {
   const displayRole = mounted ? session?.role || "user" : "user";
 
   return (
-    <header className="h-16 border-b border-gray-200 dark:border-[#1a1d24] bg-white dark:bg-[#0d0f14] flex items-center px-6 gap-4 sticky top-0 z-30">
+    <motion.header 
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="h-16 border-b border-gray-200 dark:border-[#1a1d24] bg-white dark:bg-[#0d0f14] flex items-center px-6 gap-4 sticky top-0 z-30"
+    >
       {title && (
-        <h1 className="font-display font-700 text-[17px] text-black dark:text-white mr-4">
+        <motion.h1 
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="font-display font-700 text-[17px] text-black dark:text-white mr-4"
+        >
           {title}
-        </h1>
+        </motion.h1>
       )}
       <div className="flex-1 max-w-sm">
         <div className="relative">
@@ -71,25 +79,48 @@ export default function Header({ title }: { title?: string }) {
         </div>
       </div>
       <div className="flex items-center gap-3 ml-auto">
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={toggleTheme}
           suppressHydrationWarning
           className="w-9 h-9 rounded-lg bg-[#1a1d24] flex items-center justify-center text-[#8890a0] hover:text-white transition-colors"
         >
-          {mounted && theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-        </button>
-        <a
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={theme}
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              {mounted && theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.button>
+        <motion.a
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           href="/alerts"
           className="relative w-9 h-9 rounded-lg bg-[#1a1d24] flex items-center justify-center text-[#8890a0] hover:text-white transition-colors"
         >
           <Bell size={16} />
           {unreadAlerts > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full" />
+            <motion.span 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger rounded-full" 
+            />
           )}
-        </a>
+        </motion.a>
 
         {/* User info */}
-        <div className="flex items-center gap-2 pl-3 border-l border-[#1a1d24]">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+          className="flex items-center gap-2 pl-3 border-l border-[#1a1d24]"
+        >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center font-display font-700 text-sm text-[#0a0c10]"
             style={{ background: badgeColor }}
@@ -107,17 +138,19 @@ export default function Header({ title }: { title?: string }) {
               {displayRole}
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Logout */}
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05, color: '#f05050' }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleLogout}
           title="Logout"
           className="w-9 h-9 rounded-lg bg-[#1a1d24] flex items-center justify-center text-[#8890a0] hover:text-[#f05050] transition-colors"
         >
           <LogOut size={16} />
-        </button>
+        </motion.button>
       </div>
-    </header>
+    </motion.header>
   );
 }

@@ -19,8 +19,8 @@ export default function FooterBranchLink() {
   }, []);
 
   return (
-    <a href={href} style={{ fontSize: 14, color: '#8890a0', transition: 'color 0.2s' }} className="nav-link">
+    <Link href={href} style={{ fontSize: 14, color: '#8890a0', transition: 'color 0.2s' }} className="nav-link">
       Branch Locator
-    </a>
+    </Link>
   );
 }

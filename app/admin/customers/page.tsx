@@ -171,7 +171,7 @@ export default function CustomersPage() {
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="bg-[#1a1d24] rounded-lg p-3">
                   <p className="text-[11px] text-[#8890a0] font-display font-600 uppercase tracking-widest mb-1">Aadhar</p>
-                  <p className="font-mono text-[13px] text-white">****{selected.aadhar_number.slice(-4)}</p>
+                  <p className="font-mono text-[13px] text-white">****{String(selected.aadhar_number || '').slice(-4)}</p>
                 </div>
                 <div className="bg-[#1a1d24] rounded-lg p-3">
                   <p className="text-[11px] text-[#8890a0] font-display font-600 uppercase tracking-widest mb-1">Member Since</p>

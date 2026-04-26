@@ -53,7 +53,7 @@ export default function FraudPage() {
                 {suspiciousTransactions.map(tx => (
                   <tr key={tx.transaction_id} className="table-row bg-[#f05050]/3">
                     <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">#{tx.transaction_id}</td>
-                    <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">{tx.account_no.slice(-8)}</td>
+                    <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">{String(tx.account_no || '').slice(-8)}</td>
                     <td className="px-5 py-4 text-white font-display font-600">{tx.customer_name}</td>
                     <td className="px-5 py-4">
                       {tx.type?.toLowerCase() === 'deposit' ? <Badge variant="green">Deposit</Badge> : tx.type?.toLowerCase() === 'withdrawal' || tx.type?.toLowerCase() === 'withdraw' ? <Badge variant="red">Withdraw</Badge> : <Badge variant="blue">Transfer</Badge>}
@@ -97,7 +97,7 @@ export default function FraudPage() {
                   return (
                     <tr key={tx.transaction_id} className="table-row">
                       <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">#{tx.transaction_id}</td>
-                      <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{tx.account_no.slice(-8)}</td>
+                      <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{String(tx.account_no || '').slice(-8)}</td>
                       <td className="px-5 py-3 font-700 text-white">{formatCurrency(tx.amount)}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">

@@ -144,7 +144,7 @@ export default function CreditCardsPage() {
                   </div>
                   <div>
                     <h3 className="font-display font-700 text-[16px] text-black dark:text-white tracking-widest">
-                      **** **** **** {card.card_number.slice(-4)}
+                      **** **** **** {String(card.card_number || '').slice(-4)}
                     </h3>
                     <p className="text-[12px] text-[#8890a0]">Status: <span className="capitalize">{card.status}</span></p>
                   </div>

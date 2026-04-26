@@ -123,7 +123,7 @@ const queries: Query[] = [
     run: () => {
       const simulatedDeposit = 5000
       return mockAccounts.slice(0, 5).map(a => ({
-        account: a.account_no.slice(-8),
+        account: String(a.account_no || '').slice(-8),
         bank: a.bank_name,
         before: formatCurrency(a.balance),
         trigger_action: a.account_id === 1 ? `+${formatCurrency(simulatedDeposit)} (deposit)` : '—',
