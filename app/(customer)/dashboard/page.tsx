@@ -19,7 +19,7 @@ function txBadge(type: string) {
 
 const containerVariants = {
   hidden: { opacity: 0 },
-  visible: { 
+  visible: {
     opacity: 1,
     transition: { staggerChildren: 0.1 }
   }
@@ -38,19 +38,19 @@ export default function DashboardPage() {
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
     if (!user?.id) {
-       setLoading(false);
-       return;
+      setLoading(false);
+      return;
     }
-    
+
     fetch(`/api/dashboard`, { cache: 'no-store' })
       .then(res => res.json())
-      .then(res => { 
+      .then(res => {
         if (res.success) {
           setData(res.data);
         } else {
           setData({ error: res.error });
         }
-        setLoading(false) 
+        setLoading(false)
       })
       .catch(() => setLoading(false))
   }, [user?.id])
@@ -62,10 +62,10 @@ export default function DashboardPage() {
       </div>
     )
   }
-  
+
   if (!data || data.error) {
     return (
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         className="p-6 text-black dark:text-white flex flex-col items-center justify-center h-[80vh] text-center"
@@ -81,7 +81,7 @@ export default function DashboardPage() {
   const filtered = bankFilter === 'All' ? data.myAccounts : data.myAccounts.filter((a: any) => a.bank_name === bankFilter)
 
   return (
-    <motion.div 
+    <motion.div
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -97,8 +97,8 @@ export default function DashboardPage() {
       <motion.div variants={itemVariants} className="w-full">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display font-700 text-[15px] text-black dark:text-white tracking-tight uppercase">My Accounts</h2>
-          <div className="flex gap-2">
-            {['All', 'Current', 'Savings'].map(b => (
+          <div className="flex gap-2 flex-wrap">
+            {['All', ...Array.from(new Set((data.myAccounts || []).map((a: any) => a.bank_name || 'NexusBank')))].map((b: any) => (
               <motion.button 
                 key={b} 
                 whileTap={{ scale: 0.95 }}
@@ -118,7 +118,7 @@ export default function DashboardPage() {
                 account={{
                   ...acc,
                   account_id: acc.id,
-                  bank_name: acc.type === 'checking' ? 'Checking' : 'Savings',
+                  bank_name: acc.bank_name || 'NexusBank',
                   balance: parseFloat(acc.balance),
                   account_no: acc.account_no,
                 }}
@@ -152,8 +152,8 @@ export default function DashboardPage() {
           </div>
           <div className="divide-y divide-white/5 flex-1 overflow-y-auto min-h-0">
             {data.fraudAlerts.map((alert: any, i: number) => (
-              <motion.div 
-                key={alert.transaction_id} 
+              <motion.div
+                key={alert.transaction_id}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}
@@ -186,8 +186,8 @@ export default function DashboardPage() {
           </div>
           <div className="divide-y divide-white/5">
             {data.recentTx.map((tx: any, i: number) => (
-              <motion.div 
-                key={tx.id} 
+              <motion.div
+                key={tx.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + i * 0.05 }}

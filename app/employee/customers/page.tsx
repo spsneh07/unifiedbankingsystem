@@ -10,22 +10,71 @@ export default function CustomersPage() {
   const [selected, setSelected] = useState<any>(null)
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState({ id: '', name: '', email: '', phone: '', address: '', aadhar: '' })
+  const [isEditing, setIsEditing] = useState(false)
+
+  const refreshData = () => {
+    setLoading(true)
+    fetch('/api/customers', { cache: 'no-store' }).then(r => r.json()).then(d => {
+      setData(Array.isArray(d) ? d : [])
+      setLoading(false)
+    })
+  }
 
   const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
-    fetch('/api/customers', { cache: 'no-store' }).then(r => r.json()).then(d => {
-      setData(d)
-      setLoading(false)
-    })
+    refreshData()
   }, [user?.id])
+
+  const handleSave = async () => {
+    if (!formData.name || !formData.email || !formData.phone || !formData.address || !formData.aadhar) {
+      alert('Please fill all fields')
+      return
+    }
+
+    const method = isEditing ? 'PUT' : 'POST'
+    const res = await fetch('/api/customers', {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    }).then(r => r.json())
+
+    if (res.success) {
+      setShowAdd(false)
+      setIsEditing(false)
+      setFormData({ id: '', name: '', email: '', phone: '', address: '', aadhar: '' })
+      refreshData()
+    } else {
+      alert(res.error || 'Something went wrong')
+    }
+  }
+
+  const handleEdit = (customer: any) => {
+    setIsEditing(true)
+    setFormData({
+      id: customer.id,
+      name: customer.name,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      aadhar: customer.aadhar_number || ''
+    })
+    setShowAdd(true)
+  }
+
+  const openNew = () => {
+    setIsEditing(false)
+    setFormData({ id: '', name: '', email: '', phone: '', address: '', aadhar: '' })
+    setShowAdd(true)
+  }
 
   if (loading) return <div className="p-6 text-white">Loading...</div>
 
   const mappedCustomers = data.map(c => ({
     ...c,
     customer_id: c.id,
-    name: `${c.first_name} ${c.last_name}`,
-    aadhar_number: '123456789012' // Fallback if missing
+    name: c.name,
+    aadhar_number: c.aadhar_number || '123456789012'
   }))
 
   const filtered = mappedCustomers.filter(c =>
@@ -48,7 +97,7 @@ export default function CustomersPage() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <button className="btn-primary flex items-center gap-2 text-sm" onClick={() => setShowAdd(true)}>
+          <button className="btn-primary flex items-center gap-2 text-sm" onClick={openNew}>
             <Plus size={15} /> Add Customer
           </button>
         </div>
@@ -85,7 +134,7 @@ export default function CustomersPage() {
                         <button onClick={() => setSelected(c)} className="w-7 h-7 rounded-lg bg-[#1a1d24] hover:bg-accent/10 flex items-center justify-center text-[#8890a0] hover:text-accent transition-colors">
                           <Eye size={13} />
                         </button>
-                        <button className="w-7 h-7 rounded-lg bg-[#1a1d24] hover:bg-[#22262f] flex items-center justify-center text-[#8890a0] hover:text-white transition-colors">
+                        <button onClick={() => handleEdit(c)} className="w-7 h-7 rounded-lg bg-[#1a1d24] hover:bg-[#22262f] flex items-center justify-center text-[#8890a0] hover:text-white transition-colors">
                           <Edit2 size={13} />
                         </button>
                       </div>
@@ -101,34 +150,64 @@ export default function CustomersPage() {
         </div>
 
         {/* Add Customer Modal */}
-        <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Add New Customer">
+        <Modal open={showAdd} onClose={() => setShowAdd(false)} title={isEditing ? "Edit Customer" : "Add New Customer"}>
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Full Name</label>
-                <input className="input text-sm" placeholder="Enter full name" />
+                <input 
+                  className="input text-sm" 
+                  placeholder="Enter full name" 
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Email</label>
-                <input className="input text-sm" type="email" placeholder="email@example.com" />
+                <input 
+                  className="input text-sm" 
+                  type="email" 
+                  placeholder="email@example.com" 
+                  value={formData.email}
+                  onChange={e => setFormData({ ...formData, email: e.target.value })}
+                />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Phone</label>
-                <input className="input text-sm" placeholder="10-digit number" />
+                <input 
+                  className="input text-sm" 
+                  placeholder="10-digit number" 
+                  value={formData.phone}
+                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                />
               </div>
               <div>
                 <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Aadhar Number</label>
-                <input className="input text-sm" placeholder="12-digit Aadhar" maxLength={12} />
+                <input 
+                  className="input text-sm" 
+                  placeholder="12-digit Aadhar" 
+                  maxLength={12} 
+                  value={formData.aadhar}
+                  onChange={e => setFormData({ ...formData, aadhar: e.target.value })}
+                />
               </div>
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Address</label>
-              <textarea className="input text-sm resize-none" rows={2} placeholder="Full address" />
+              <textarea 
+                className="input text-sm resize-none" 
+                rows={2} 
+                placeholder="Full address" 
+                value={formData.address}
+                onChange={e => setFormData({ ...formData, address: e.target.value })}
+              />
             </div>
             <div className="flex gap-3 pt-2">
-              <button className="btn-primary flex-1 text-sm">Create Customer</button>
+              <button className="btn-primary flex-1 text-sm" onClick={handleSave}>
+                {isEditing ? 'Update Customer' : 'Create Customer'}
+              </button>
               <button className="btn-ghost flex-1 text-sm" onClick={() => setShowAdd(false)}>Cancel</button>
             </div>
           </div>

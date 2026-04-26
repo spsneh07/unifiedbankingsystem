@@ -37,12 +37,14 @@ export default function AccountsPage() {
   const [customers, setCustomers] = useState<any[]>([])
   const [branches, setBranches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [formData, setFormData] = useState({ customer_id: '', bank_name: 'SBI', account_type: 'Savings', initial_deposit: '', branch_id: '' })
 
-  useEffect(() => {
+  const refreshData = () => {
+    setLoading(true)
     Promise.all([
-      fetch('/api/accounts').then(r => r.json()),
-      fetch('/api/customers').then(r => r.json()),
-      fetch('/api/branches').then(r => r.json())
+      fetch('/api/accounts', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/customers', { cache: 'no-store' }).then(r => r.json()),
+      fetch('/api/branches', { cache: 'no-store' }).then(r => r.json())
     ]).then(([accountsData, customersData, branchesData]) => {
       setData(Array.isArray(accountsData) ? accountsData : [])
       setCustomers(Array.isArray(customersData) ? customersData : [])
@@ -52,7 +54,32 @@ export default function AccountsPage() {
       console.error(err)
       setLoading(false)
     })
+  }
+
+  useEffect(() => {
+    refreshData()
   }, [])
+
+  const handleSubmit = async () => {
+    if (!formData.customer_id || !formData.bank_name || !formData.account_type || !formData.initial_deposit) {
+      alert('Please fill all required fields')
+      return
+    }
+
+    const res = await fetch('/api/accounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    }).then(r => r.json())
+
+    if (res.success) {
+      setShowAdd(false)
+      setFormData({ customer_id: '', bank_name: 'SBI', account_type: 'Savings', initial_deposit: '', branch_id: '' })
+      refreshData()
+    } else {
+      alert(res.error || 'Failed to create account')
+    }
+  }
 
   if (loading) return <div className="p-6 text-white">Loading accounts data...</div>
 
@@ -151,39 +178,61 @@ export default function AccountsPage() {
           <div className="space-y-4">
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Customer</label>
-              <select className="input text-sm">
-                <option>Select customer…</option>
-                {customers.map(c => <option key={c.id} value={c.id}>{c.first_name} {c.last_name}</option>)}
+              <select 
+                className="input text-sm"
+                value={formData.customer_id}
+                onChange={e => setFormData({ ...formData, customer_id: e.target.value })}
+              >
+                <option value="">Select customer…</option>
+                {customers.map(c => <option key={c.id} value={c.id}>{c.name || `${c.first_name} ${c.last_name}`}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Bank</label>
-                <select className="input text-sm">
+                <select 
+                  className="input text-sm"
+                  value={formData.bank_name}
+                  onChange={e => setFormData({ ...formData, bank_name: e.target.value })}
+                >
                   {BANKS.map(b => <option key={b} value={b}>{b}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Account Type</label>
-                <select className="input text-sm">
-                  <option>Savings</option>
-                  <option>Current</option>
+                <select 
+                  className="input text-sm"
+                  value={formData.account_type}
+                  onChange={e => setFormData({ ...formData, account_type: e.target.value })}
+                >
+                  <option value="Savings">Savings</option>
+                  <option value="Current">Current</option>
                 </select>
               </div>
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Initial Deposit (₹)</label>
-              <input className="input text-sm" type="number" placeholder="Minimum ₹1,000" />
+              <input 
+                className="input text-sm" 
+                type="number" 
+                placeholder="Minimum ₹1,000" 
+                value={formData.initial_deposit}
+                onChange={e => setFormData({ ...formData, initial_deposit: e.target.value })}
+              />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Branch Location</label>
-              <select className="input text-sm">
+              <select 
+                className="input text-sm"
+                value={formData.branch_id}
+                onChange={e => setFormData({ ...formData, branch_id: e.target.value })}
+              >
                 <option value="">Select branch…</option>
                 {branches.map(b => <option key={b.branch_id} value={b.branch_id}>{b.name}</option>)}
               </select>
             </div>
             <div className="flex gap-3 pt-2">
-              <button className="btn-primary flex-1 text-sm">Create Account</button>
+              <button className="btn-primary flex-1 text-sm" onClick={handleSubmit}>Create Account</button>
               <button className="btn-ghost flex-1 text-sm" onClick={() => setShowAdd(false)}>Cancel</button>
             </div>
           </div>

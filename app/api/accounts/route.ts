@@ -57,3 +57,32 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
+
+export async function POST(req: Request) {
+  try {
+    const cookieStore = await cookies();
+    const userId = cookieStore.get('ub_user_id')?.value;
+
+    if (!userId) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { customer_id, bank_name, account_type, initial_deposit, branch_id } = await req.json();
+
+    if (!customer_id || !bank_name || !account_type) {
+      return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // Generate a mock account number
+    const account_no = `${bank_name.substring(0, 3).toUpperCase()}${Math.floor(1000000000 + Math.random() * 9000000000)}`;
+
+    await query(
+      'INSERT INTO accounts (account_no, customer_id, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [account_no, customer_id, branch_id || 1, bank_name, account_type, initial_deposit || 0, 'Active']
+    );
+
+    return NextResponse.json({ success: true, message: 'Account created successfully', account_no });
+  } catch (error: any) {
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+  }
+}
