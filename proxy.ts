@@ -7,7 +7,7 @@ const ROLE_ROUTES: Record<string, string[]> = {
   customer: ['/dashboard', '/accounts', '/transactions', '/analytics', '/alerts', '/scheduled', '/credit-cards', '/loans', '/branches'],
 }
 
-const PUBLIC_PATHS = ['/', '/auth', '/api', '/signup', '/branches']
+const PUBLIC_PATHS = ['/', '/auth', '/api', '/signup', '/branches', '/forgot-password', '/reset-password']
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))

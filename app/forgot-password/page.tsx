@@ -2,15 +2,22 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Landmark } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Landmark, Copy, Check, ArrowRight } from 'lucide-react'
 
 export default function ForgotPasswordPage() {
+  const router = useRouter()
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [token, setToken] = useState('')
+  const [copied, setCopied] = useState(false)
 
   const submit = async () => {
+    if (!email.trim()) {
+      setError('Please enter your email address.')
+      return
+    }
     setLoading(true)
     setError('')
     setToken('')
@@ -18,7 +25,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim() }),
       })
       const data = await res.json()
       if (!res.ok || !data?.success) {
@@ -31,6 +38,20 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const copyToken = async () => {
+    try {
+      await navigator.clipboard.writeText(token)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // fallback: select the text
+    }
+  }
+
+  const goToReset = () => {
+    router.push(`/reset-password?token=${encodeURIComponent(token)}`)
   }
 
   return (
@@ -65,36 +86,57 @@ export default function ForgotPasswordPage() {
             </div>
           )}
 
-          {token && (
-            <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-[12px] text-accent break-all">
-              {token}
+          {token ? (
+            <div className="space-y-3">
+              <p className="text-[12px] text-[#8890a0]">Your reset token (valid for 15 minutes):</p>
+              <div className="p-3 rounded-lg bg-accent/10 border border-accent/20 text-[11px] text-accent break-all font-mono">
+                {token}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={copyToken}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border border-accent/30 text-[12px] text-accent hover:bg-accent/10 transition-colors"
+                >
+                  {copied ? <Check size={14} /> : <Copy size={14} />}
+                  {copied ? 'Copied!' : 'Copy token'}
+                </button>
+                <button
+                  onClick={goToReset}
+                  className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-accent text-[#0a0c10] text-[12px] font-600 hover:opacity-90 transition-opacity"
+                >
+                  Use token <ArrowRight size={14} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2">Email</label>
+                <input
+                  className="input"
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && submit()}
+                />
+              </div>
             </div>
           )}
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2">Email</label>
-              <input
-                className="input"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={submit}
-            disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <span className="w-4 h-4 rounded-full border-2 border-[#0a0c10] border-t-transparent animate-spin" />
-            ) : (
-              'Generate token'
-            )}
-          </button>
+          {!token && (
+            <button
+              onClick={submit}
+              disabled={loading}
+              className="btn-primary w-full flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <span className="w-4 h-4 rounded-full border-2 border-[#0a0c10] border-t-transparent animate-spin" />
+              ) : (
+                'Generate token'
+              )}
+            </button>
+          )}
 
           <div className="text-center text-[12px] text-[#8890a0]">
             <Link href="/reset-password" className="text-accent hover:underline">
@@ -110,4 +152,3 @@ export default function ForgotPasswordPage() {
     </div>
   )
 }
-
