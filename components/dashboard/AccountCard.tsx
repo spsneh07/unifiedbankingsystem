@@ -2,9 +2,9 @@ import { CreditCard, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { formatCurrency, maskAccountNo } from '@/lib/mockData'
 
 const bankColors: Record<string, { from: string; to: string; badge: string }> = {
-  SBI: { from: '#1a2a1a', to: '#0f1a0f', badge: '#00d4aa' },
-  HDFC: { from: '#1a1a2a', to: '#0f0f1a', badge: '#4090f0' },
-  ICICI: { from: '#2a1a10', to: '#1a0f0a', badge: '#f0c040' },
+  SBI: { from: 'rgba(0,212,170,0.08)', to: 'rgba(0,212,170,0.03)', badge: '#00d4aa' },
+  HDFC: { from: 'rgba(64,144,240,0.08)', to: 'rgba(64,144,240,0.03)', badge: '#4090f0' },
+  ICICI: { from: 'rgba(240,192,64,0.08)', to: 'rgba(240,192,64,0.03)', badge: '#f0c040' },
 }
 
 interface Account {
@@ -22,8 +22,8 @@ export default function AccountCard({ account }: { account: Account }) {
 
   return (
     <div
-      className="relative rounded-2xl p-5 overflow-hidden card-hover cursor-pointer"
-      style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`, border: '1px solid #1a1d24' }}
+      className="relative rounded-2xl p-5 overflow-hidden card transition-all hover:shadow-md border border-gray-100 dark:border-white/5"
+      style={{ background: `linear-gradient(135deg, ${colors.from}, ${colors.to})` }}
     >
       {/* Decorative circle */}
       <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full opacity-10" style={{ background: colors.badge }} />
@@ -39,17 +39,17 @@ export default function AccountCard({ account }: { account: Account }) {
       </div>
 
       <p className="font-mono text-[14px] text-[#8890a0] mb-3">{maskAccountNo(account.account_no)}</p>
-      <p className="font-display font-700 text-[22px] text-white">{formatCurrency(account.balance)}</p>
+      <p className="font-display font-700 text-[22px] text-black dark:text-white">{formatCurrency(account.balance)}</p>
 
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/5">
+      <div className="flex items-center justify-between mt-4 pt-4 border-t border-black/5 dark:border-white/5">
         <span className={`badge ${isActive ? 'badge-green' : account.status === 'frozen' ? 'badge-blue' : 'badge-red'}`}>
           {account.status}
         </span>
         <div className="flex gap-2">
-          <button className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors text-[#00d4aa]">
+          <button className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-[#00d4aa]">
             <ArrowUpRight size={14} />
           </button>
-          <button className="w-7 h-7 rounded-lg flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors text-[#f05050]">
+          <button className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors text-[#f05050]">
             <ArrowDownLeft size={14} />
           </button>
         </div>

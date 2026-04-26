@@ -19,11 +19,11 @@ const accentMap = {
 export default function StatCard({ label, value, sub, icon: Icon, trend, accent = 'green' }: StatCardProps) {
   const colors = accentMap[accent] || accentMap['green']
   return (
-    <div className="card card-hover p-5 animate-slide-up">
+    <div className="card p-5 animate-slide-up hover:border-[#00d4aa]/30 transition-all">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-[12px] font-display font-600 uppercase tracking-widest text-[#8890a0] mb-2">{label}</p>
-          <p className="text-[26px] font-display font-700 text-white leading-tight">{value}</p>
+          <p className="text-[26px] font-display font-700 text-black dark:text-white leading-tight">{value}</p>
           {sub && <p className="text-[12px] text-[#8890a0] mt-1">{sub}</p>}
           {trend && (
             <span className={`inline-flex items-center gap-1 text-[12px] font-600 mt-2 ${trend.up ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>

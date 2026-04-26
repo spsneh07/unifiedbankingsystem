@@ -24,14 +24,14 @@ body {
   height: 4px;
 }
 ::-webkit-scrollbar-track {
-  background: #111318;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c313c;
+  @apply bg-gray-300 dark:bg-[#2c313c];
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d4455;
+  @apply bg-gray-400 dark:bg-[#3d4455];
 }
 
 .font-display {
@@ -42,7 +42,7 @@ body {
 }
 
 .card {
-  @apply bg-white dark:bg-[#111318] border border-gray-200 dark:border-[#1a1d24] rounded-xl;
+  @apply bg-white dark:bg-[#111318] border border-gray-100 dark:border-[#1a1d24] rounded-xl shadow-sm dark:shadow-none;
 }
 
 .card-hover {
@@ -77,21 +77,10 @@ body {
 }
 
 .btn-ghost {
-  background: transparent;
-  color: #8890a0;
-  font-family: var(--font-display);
-  font-weight: 500;
-  border-radius: 8px;
-  padding: 8px 20px;
-  transition:
-    background 0.2s,
-    color 0.2s;
-  border: 1px solid #22262f;
-  cursor: pointer;
+  @apply bg-transparent text-[#8890a0] font-display font-medium rounded-lg px-5 py-2 transition-all border border-gray-200 dark:border-[#22262f] cursor-pointer;
 }
 .btn-ghost:hover {
-  background: #1a1d24;
-  color: #e8eaf0;
+  @apply bg-gray-50 dark:bg-[#1a1d24] text-black dark:text-[#e8eaf0];
 }
 
 .badge {
@@ -126,22 +115,13 @@ body {
 }
 
 .input {
-  background: #1a1d24;
-  border: 1px solid #22262f;
-  border-radius: 8px;
-  color: #e8eaf0;
-  padding: 10px 14px;
-  font-family: var(--font-body);
-  font-size: 14px;
-  width: 100%;
-  transition: border-color 0.2s;
-  outline: none;
+  @apply bg-gray-50 dark:bg-[#1a1d24] border border-gray-200 dark:border-[#22262f] rounded-lg text-black dark:text-[#e8eaf0] px-3.5 py-2.5 font-sans text-sm w-full transition-all outline-none;
 }
 .input:focus {
-  border-color: #00d4aa;
+  @apply border-[#00d4aa] ring-1 ring-[#00d4aa]/20;
 }
 .input::placeholder {
-  color: #3d4455;
+  @apply text-[#94a3b8] dark:text-[#3d4455];
 }
 
 select.input {
@@ -149,11 +129,10 @@ select.input {
 }
 
 .table-row {
-  border-bottom: 1px solid #1a1d24;
-  transition: background 0.15s;
+  @apply border-b border-gray-100 dark:border-[#1a1d24] transition-all;
 }
 .table-row:hover {
-  background: #111318;
+  @apply bg-gray-50 dark:bg-[#111318];
 }
 
 .glow-accent {
@@ -247,13 +226,10 @@ select.input {
 }
 
 /* Leaflet Dark Theme */
-.leaflet-container {
-  width: 100%;
-  height: 100%;
-  border-radius: 12px;
+.dark .leaflet-container {
   filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
 }
-.leaflet-tile-pane {
+.dark .leaflet-tile-pane {
   filter: brightness(0.6) contrast(1.2);
 }
 .leaflet-popup-content-wrapper {

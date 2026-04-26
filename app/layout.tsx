@@ -4,9 +4,8 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/Toast";
 
 export const metadata: Metadata = {
-  title: "NexusBank — Unified Banking System",
-  description:
-    "Centralized banking platform for managing multiple bank accounts",
+  title: "NexusBank",
+  description: "Unified Banking System",
 };
 
 export default function RootLayout({

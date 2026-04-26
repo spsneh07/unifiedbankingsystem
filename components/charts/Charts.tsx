@@ -17,7 +17,11 @@ export function MonthlyBarChart({ data }: { data: any[] }) {
         <CartesianGrid strokeDasharray="3 3" stroke="#1a1d24" vertical={false} />
         <XAxis dataKey="month" tick={{ fill: '#8890a0', fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: '#8890a0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
-        <Tooltip {...tooltipStyle} formatter={(v: number) => `₹${v.toLocaleString('en-IN')}`} />
+        <Tooltip 
+          {...tooltipStyle} 
+          formatter={(v: number) => `₹${v.toLocaleString('en-IN')}`} 
+          cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+        />
         <Bar dataKey="deposits" name="Deposits" fill="#00d4aa" radius={[4, 4, 0, 0]} />
         <Bar dataKey="withdrawals" name="Withdrawals" fill="#f05050" radius={[4, 4, 0, 0]} />
       </BarChart>
@@ -32,7 +36,11 @@ export function TrendLineChart({ data }: { data: any[] }) {
         <CartesianGrid strokeDasharray="3 3" stroke="#1a1d24" vertical={false} />
         <XAxis dataKey="month" tick={{ fill: '#8890a0', fontSize: 12 }} axisLine={false} tickLine={false} />
         <YAxis tick={{ fill: '#8890a0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
-        <Tooltip {...tooltipStyle} formatter={(v: number) => `₹${v.toLocaleString('en-IN')}`} />
+        <Tooltip 
+          {...tooltipStyle} 
+          formatter={(v: number) => `₹${v.toLocaleString('en-IN')}`} 
+          cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+        />
         <Line type="monotone" dataKey="deposits" name="Deposits" stroke="#00d4aa" strokeWidth={2} dot={false} />
         <Line type="monotone" dataKey="withdrawals" name="Withdrawals" stroke="#f05050" strokeWidth={2} dot={false} />
       </LineChart>
@@ -65,7 +73,11 @@ export function SpendingBarChart({ data }: { data: any[] }) {
         <CartesianGrid strokeDasharray="3 3" stroke="#1a1d24" horizontal={false} />
         <XAxis type="number" tick={{ fill: '#8890a0', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `₹${(v/1000).toFixed(0)}k`} />
         <YAxis type="category" dataKey="category" tick={{ fill: '#8890a0', fontSize: 12 }} axisLine={false} tickLine={false} width={80} />
-        <Tooltip {...tooltipStyle} formatter={(v: number) => `₹${v.toLocaleString('en-IN')}`} />
+        <Tooltip 
+          {...tooltipStyle} 
+          formatter={(v: number) => `₹${v.toLocaleString('en-IN')}`} 
+          cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }}
+        />
         <Bar dataKey="amount" name="Amount" radius={[0, 4, 4, 0]}>
           {data.map((entry, i) => <Cell key={i} fill={entry.color} />)}
         </Bar>

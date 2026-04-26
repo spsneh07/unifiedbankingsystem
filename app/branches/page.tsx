@@ -141,12 +141,29 @@ export default function BranchesPage() {
                       </p>
                       <p className="flex items-center gap-3 text-[15px]">
                         <Phone size={18} className="text-[#00d4aa]" />
-                        +91 1800-425-8888
+                        {selectedBranch.phone || '+91 1800-425-8888'}
                       </p>
                     </div>
                     <div className="pt-4 flex gap-4">
-                      <button className="btn-primary px-8">Directions</button>
-                      <button className="btn-secondary px-8">Contact</button>
+                      <button 
+                        onClick={() => {
+                          const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedBranch.latitude},${selectedBranch.longitude}`;
+                          window.open(url, '_blank');
+                        }}
+                        className="btn-primary px-8 flex items-center gap-2"
+                      >
+                        <Navigation size={16} />
+                        Directions
+                      </button>
+                      <button 
+                        onClick={() => {
+                          window.location.href = `tel:${selectedBranch.phone || '18004258888'}`;
+                        }}
+                        className="btn-secondary px-8 flex items-center gap-2"
+                      >
+                        <Phone size={16} />
+                        Contact
+                      </button>
                     </div>
                   </div>
                   
@@ -170,12 +187,13 @@ export default function BranchesPage() {
               </div>
 
               <div className="h-[400px] card overflow-hidden p-0 relative border-[#00d4aa]/20">
-                 <BranchMap 
+                  <BranchMap 
                     lat={selectedBranch.latitude} 
                     lng={selectedBranch.longitude} 
                     address={selectedBranch.address}
                     name={selectedBranch.name}
-                 />
+                    phone={selectedBranch.phone}
+                  />
               </div>
             </>
           ) : (

@@ -97,7 +97,7 @@ export default function Header({ title }: { title?: string }) {
             {initials}
           </div>
           <div className="hidden sm:block">
-            <div className="text-[13px] font-display font-600 text-white leading-tight truncate max-w-[140px]">
+            <div className="text-[13px] font-display font-600 text-black dark:text-white leading-tight truncate max-w-[140px]">
               {displayEmail}
             </div>
             <div

@@ -44,7 +44,7 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-white flex items-center justify-center h-[60vh]">
+      <div className="p-6 text-black dark:text-white flex items-center justify-center h-[60vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-accent"></div>
       </div>
     )
@@ -52,7 +52,7 @@ export default function DashboardPage() {
   
   if (!data || data.error) {
     return (
-      <div className="p-6 text-white flex flex-col items-center justify-center h-[80vh] text-center">
+      <div className="p-6 text-black dark:text-white flex flex-col items-center justify-center h-[80vh] text-center">
         <ShieldAlert size={48} className="text-danger mb-4" />
         <h2 className="text-2xl font-display font-700 mb-2">Account Setup Required</h2>
         <p className="text-[#8890a0] mb-6 max-w-md">Your customer profile is not fully initialized. Please contact support or try logging in again.</p>
@@ -74,11 +74,11 @@ export default function DashboardPage() {
 
       <div className="w-full">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display font-700 text-[15px] text-white">My Accounts</h2>
+          <h2 className="font-display font-700 text-[15px] text-black dark:text-white">My Accounts</h2>
           <div className="flex gap-2">
             {['All', 'Current', 'Savings'].map(b => (
               <button key={b} onClick={() => setBankFilter(b)}
-                className={`text-[12px] font-display font-600 px-3 py-1 rounded-full transition-all ${bankFilter === b ? 'bg-accent text-[#0a0c10]' : 'bg-[#1a1d24] text-[#8890a0] hover:text-white'}`}>
+                className={`text-[12px] font-display font-600 px-3 py-1 rounded-full transition-all ${bankFilter === b ? 'bg-accent text-[#0a0c10]' : 'bg-[#1a1d24] text-[#8890a0] hover:text-black dark:text-white'}`}>
                 {b}
               </button>
             ))}
@@ -103,7 +103,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
         <div className="lg:col-span-2 card p-6 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-600 text-[14px] text-white">Monthly Cash Flow</h3>
+            <h3 className="font-display font-600 text-[14px] text-black dark:text-white">Monthly Cash Flow</h3>
             <span className="text-[12px] text-[#8890a0]">Last 6 months</span>
           </div>
           <div className="h-[300px] min-h-[300px] w-full">
@@ -119,10 +119,10 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1 card p-6 flex flex-col">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-display font-600 text-[14px] text-white">Active Alerts</h3>
+            <h3 className="font-display font-600 text-[14px] text-black dark:text-white">Active Alerts</h3>
             <span className="badge badge-red">{data.fraudAlerts.length}</span>
           </div>
-          <div className="divide-y divide-[#1a1d24] flex-1 overflow-y-auto min-h-0">
+          <div className="divide-y divide-gray-100 dark:divide-[#1a1d24] flex-1 overflow-y-auto min-h-0">
             {data.fraudAlerts.map((alert: any) => (
               <div key={alert.transaction_id} className="py-3 first:pt-0 last:pb-0">
                 <div className="flex items-start gap-3">
@@ -142,20 +142,20 @@ export default function DashboardPage() {
 
         <div className="lg:col-span-2 card w-full">
           <div className="flex items-center justify-between px-6 py-5 border-b border-[#1a1d24]">
-            <h3 className="font-display font-600 text-[15px] text-white">Recent Transactions</h3>
+            <h3 className="font-display font-600 text-[15px] text-black dark:text-white">Recent Transactions</h3>
             <Link href="/transactions" className="text-[13px] text-accent hover:underline font-medium">View all →</Link>
           </div>
-          <div className="divide-y divide-[#1a1d24]">
+          <div className="divide-y divide-gray-100 dark:divide-[#1a1d24]">
             {data.recentTx.map((tx: any) => (
-              <div key={tx.id} className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-[#12141a] transition-colors">
+              <div key={tx.id} className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-[#12141a] transition-colors">
                 <div className="flex items-center gap-4 w-1/3 min-w-0">
                   <div className="min-w-0 flex-1">
-                    <p className="text-[14px] font-medium text-white truncate">{tx.description}</p>
+                    <p className="text-[14px] font-medium text-black dark:text-white truncate">{tx.description}</p>
                     <p className="text-[12px] text-[#8890a0] mt-0.5">{tx.account_no}</p>
                   </div>
                 </div>
                 <div className="w-1/4">
-                  <p className="text-[13px] text-white">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</p>
+                  <p className="text-[13px] text-black dark:text-white">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</p>
                 </div>
                 <div className="w-1/4">{txBadge(tx.type)}</div>
                 <div className="w-1/6 text-right">

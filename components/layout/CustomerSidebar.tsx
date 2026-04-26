@@ -6,6 +6,7 @@ import {
   BarChart2, Bell, LogOut, Landmark, CalendarClock
 } from 'lucide-react'
 import { clearSession } from '@/lib/auth'
+import Logo from '@/components/ui/Logo'
 
 const nav = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -26,9 +27,7 @@ export default function CustomerSidebar() {
   return (
     <aside className="h-screen sticky top-0 w-64 bg-gray-50 dark:bg-[#0d0f14] border-r border-gray-200 dark:border-[#1a1d24] flex flex-col">
       <div className="p-6 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-[#00d4aa] flex items-center justify-center">
-          <Landmark size={18} className="text-[#0a0c10]" />
-        </div>
+        <Logo size={36} />
         <div>
           <span className="font-display font-800 text-black dark:text-white text-[16px] block leading-tight">Nexus<span className="text-[#00d4aa]">Bank</span></span>
           <span className="text-[10px] text-[#00d4aa]/60 font-600 tracking-[0.15em]">PERSONAL</span>

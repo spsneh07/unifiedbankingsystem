@@ -18,6 +18,7 @@ interface BranchMapProps {
   lng?: number | string | null;
   address?: string;
   name?: string;
+  phone?: string;
 }
 
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
@@ -38,7 +39,7 @@ function MapEvents({ center }: { center: [number, number] }) {
   return null;
 }
 
-export default function BranchMap({ lat, lng, address, name }: BranchMapProps) {
+export default function BranchMap({ lat, lng, address, name, phone }: BranchMapProps) {
   const [L, setL] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
   
@@ -81,7 +82,10 @@ export default function BranchMap({ lat, lng, address, name }: BranchMapProps) {
           <Popup>
             <div className="p-1 min-w-[150px]">
               <strong className="block text-[#0a0c10] text-sm">{name || 'Branch Location'}</strong>
-              <span className="text-[11px] text-[#3d4455]">{address}</span>
+              <div className="text-[11px] text-[#3d4455] mt-1">
+                <p>{address}</p>
+                {phone && <p className="font-600 mt-1">📞 {phone}</p>}
+              </div>
             </div>
           </Popup>
         </Marker>

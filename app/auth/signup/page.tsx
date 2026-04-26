@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Landmark, Eye, EyeOff, UserPlus, Info, Phone, MapPin, Fingerprint } from 'lucide-react'
+import Logo from '@/components/ui/Logo'
 
 export default function SignupPage() {
   const router = useRouter()
@@ -61,9 +62,7 @@ export default function SignupPage() {
       <div className="w-full max-w-lg animate-slide-up relative">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-4 glow-accent">
-            <Landmark size={28} className="text-accent" />
-          </div>
+          <Logo size={56} className="mx-auto mb-4" />
           <h1 className="font-display font-800 text-[28px] text-white">NexusBank</h1>
           <p className="text-[13px] text-[#8890a0] mt-1">Unified Banking System</p>
         </div>

@@ -4,6 +4,7 @@ import { motion, useInView } from 'framer-motion'
 import { useRef } from 'react'
 import { Landmark, Shield, Zap, Globe, Lock, BarChart3, ChevronRight, PlayCircle, Star, ArrowRight } from 'lucide-react'
 import FooterBranchLink from '@/components/layout/FooterBranchLink'
+import Logo from '@/components/ui/Logo'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -80,9 +81,9 @@ export default function HomePage() {
         style={{ position: 'sticky', top: 0, zIndex: 100, background: 'rgba(8,10,15,0.8)', backdropFilter: 'blur(24px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0 2rem' }}
       >
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
-          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 800, fontSize: 20, color: '#e2e2e8' }}>
-            <span style={{ fontSize: 22 }}>🏦</span>
-            Unified<span style={{ color: '#00d4aa' }}>Bank</span>
+          <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 800, fontSize: 22, color: '#f0f2f8' }}>
+            <Logo size={34} />
+            <span className="tracking-tight">Nexus<span style={{ color: '#00d4aa' }}>Bank</span></span>
           </Link>
           <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
             <Link href="#features" className="nav-link">Features</Link>
