@@ -58,18 +58,15 @@ export default function BranchesPage() {
 
   return (
     <div className="p-8 space-y-8 animate-fade-in">
-      <div className="bg-[#00d4aa]/10 p-4 rounded-xl border border-[#00d4aa]/20 mb-4">
-        <p className="text-[#00d4aa] font-800 uppercase tracking-widest text-[10px]">System Diagnostics: Page Rendered</p>
-      </div>
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-display font-800 text-white">Branch Locator</h1>
           <p className="text-[14px] text-[#8890a0] mt-1">Find and visit our high-precision banking centers across India.</p>
         </div>
         <div className="relative max-w-sm w-full">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3d4455]" />
+          <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d4455] z-10 pointer-events-none" />
           <input 
-            className="input pl-10" 
+            className="input !pl-11" 
             placeholder="Search city or branch name..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}

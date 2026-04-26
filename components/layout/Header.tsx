@@ -70,10 +70,10 @@ export default function Header({ title }: { title?: string }) {
         <div className="relative">
           <Search
             size={14}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3d4455]"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[#3d4455] z-10 pointer-events-none"
           />
           <input
-            className="input pl-9 py-2 text-sm"
+            className="input !pl-10 py-2 text-sm"
             placeholder="Search accounts, customers…"
           />
         </div>

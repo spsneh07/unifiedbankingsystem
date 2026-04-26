@@ -42,7 +42,7 @@ function MapEvents({ center }: { center: [number, number] }) {
 export default function BranchMap({ lat, lng, address, name, phone }: BranchMapProps) {
   const [L, setL] = useState<any>(null);
   const [mounted, setMounted] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
     import('leaflet').then(leaflet => {
@@ -67,9 +67,9 @@ export default function BranchMap({ lat, lng, address, name, phone }: BranchMapP
 
   return (
     <div className="w-full h-[400px] rounded-xl overflow-hidden border border-[#1a1d24] relative z-0">
-      <MapContainer 
-        center={position} 
-        zoom={13} 
+      <MapContainer
+        center={position}
+        zoom={13}
         scrollWheelZoom={false}
         style={{ height: '400px', width: '100%', background: '#1a1d24' }}
       >
