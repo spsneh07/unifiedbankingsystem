@@ -31,9 +31,18 @@ function MapEvents({ center }: { center: [number, number] }) {
   const { useMap } = require('react-leaflet');
   const map = useMap();
   useEffect(() => {
-    if (center) {
+    if (center && map) {
       map.setView(center, map.getZoom());
-      setTimeout(() => map.invalidateSize(), 100);
+      const timeoutId = setTimeout(() => {
+        try {
+          if (map._container) {
+            map.invalidateSize();
+          }
+        } catch (e) {
+          // ignore unmount errors
+        }
+      }, 100);
+      return () => clearTimeout(timeoutId);
     }
   }, [center, map]);
   return null;
