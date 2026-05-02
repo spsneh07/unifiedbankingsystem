@@ -153,7 +153,7 @@ export default function DashboardPage() {
           <div className="divide-y divide-white/5 flex-1 overflow-y-auto min-h-0">
             {data.fraudAlerts.map((alert: any, i: number) => (
               <motion.div
-                key={alert.transaction_id}
+                key={alert.id || i}
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 + i * 0.1 }}
