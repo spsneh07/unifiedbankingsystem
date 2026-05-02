@@ -1,13 +1,32 @@
 'use client'
-import { suspiciousTransactions, mockTransactions, formatCurrency } from '@/lib/mockData'
+import { useState, useEffect } from 'react'
+import { formatCurrency } from '@/lib/utils'
 import { ShieldAlert, AlertTriangle, TrendingUp, Eye } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import StatCard from '@/components/ui/StatCard'
 
-const avgAmount = mockTransactions.reduce((s, t) => s + t.amount, 0) / mockTransactions.length
-const threshold = avgAmount * 3
-
 export default function FraudPage() {
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/transactions', { cache: 'no-store' })
+      .then(r => r.json())
+      .then(data => {
+        setTransactions(Array.isArray(data) ? data : [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  const suspiciousTransactions = transactions.filter(t => t.is_suspicious)
+  const avgAmount = transactions.length > 0 ? transactions.reduce((s: number, t: any) => s + parseFloat(t.amount), 0) / transactions.length : 0
+  const threshold = avgAmount * 3
+
+  if (loading) {
+    return <div className="p-6 text-white">Loading fraud data...</div>
+  }
+
   return (
     <div className="p-6 space-y-6 animate-fade-in">
 
@@ -28,7 +47,7 @@ export default function FraudPage() {
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard label="Total Flagged" value={String(suspiciousTransactions.length)} icon={ShieldAlert} accent="red" />
-          <StatCard label="Avg Suspicious" value={formatCurrency(suspiciousTransactions.reduce((s,t)=>s+t.amount,0)/suspiciousTransactions.length || 0)} icon={TrendingUp} accent="red" />
+          <StatCard label="Avg Suspicious" value={formatCurrency(suspiciousTransactions.length > 0 ? suspiciousTransactions.reduce((s: number, t: any) => s + parseFloat(t.amount), 0) / suspiciousTransactions.length : 0)} icon={TrendingUp} accent="red" />
           <StatCard label="Detection Threshold" value={formatCurrency(threshold)} icon={AlertTriangle} accent="gold" />
           <StatCard label="Avg Transaction" value={formatCurrency(avgAmount)} icon={Eye} accent="blue" />
         </div>
@@ -50,10 +69,10 @@ export default function FraudPage() {
                 </tr>
               </thead>
               <tbody>
-                {suspiciousTransactions.map(tx => (
-                  <tr key={tx.transaction_id} className="table-row bg-[#f05050]/3">
-                    <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">#{tx.transaction_id}</td>
-                    <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">{String(tx.account_no || '').slice(-8)}</td>
+                {suspiciousTransactions.map((tx: any) => (
+                  <tr key={tx.id} className="table-row bg-[#f05050]/3">
+                    <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">#{tx.id}</td>
+                    <td className="px-5 py-4 font-mono text-[12px] text-[#8890a0]">{String(tx.account_number || '').slice(-8)}</td>
                     <td className="px-5 py-4 text-white font-display font-600">{tx.customer_name}</td>
                     <td className="px-5 py-4">
                       {tx.type?.toLowerCase() === 'deposit' ? <Badge variant="green">Deposit</Badge> : tx.type?.toLowerCase() === 'withdrawal' || tx.type?.toLowerCase() === 'withdraw' ? <Badge variant="red">Withdraw</Badge> : <Badge variant="blue">Transfer</Badge>}
@@ -61,9 +80,9 @@ export default function FraudPage() {
                     <td className="px-5 py-4">
                       <span className="font-display font-700 text-[#f05050] text-[15px]">{formatCurrency(tx.amount)}</span>
                     </td>
-                    <td className="px-5 py-4 text-[#f0c040] font-700">{(tx.amount / avgAmount).toFixed(1)}×</td>
+                    <td className="px-5 py-4 text-[#f0c040] font-700">{avgAmount > 0 ? (parseFloat(tx.amount) / avgAmount).toFixed(1) : '0'}×</td>
                     <td className="px-5 py-4 text-[#8890a0] max-w-[160px] truncate">{tx.description}</td>
-                    <td className="px-5 py-4 text-[12px] text-[#8890a0]">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</td>
+                    <td className="px-5 py-4 text-[12px] text-[#8890a0]">{new Date(tx.created_at).toLocaleDateString('en-IN')}</td>
                     <td className="px-5 py-4">
                       <span className="badge badge-red flex items-center gap-1 w-fit">
                         <AlertTriangle size={10} /> Flagged
@@ -91,13 +110,13 @@ export default function FraudPage() {
                 </tr>
               </thead>
               <tbody>
-                {[...mockTransactions].sort((a,b) => b.amount - a.amount).map(tx => {
-                  const mult = tx.amount / avgAmount
+                {[...transactions].sort((a, b) => parseFloat(b.amount) - parseFloat(a.amount)).map((tx: any) => {
+                  const mult = avgAmount > 0 ? parseFloat(tx.amount) / avgAmount : 0
                   const risk = mult > 3 ? 'high' : mult > 1.5 ? 'medium' : 'low'
                   return (
-                    <tr key={tx.transaction_id} className="table-row">
-                      <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">#{tx.transaction_id}</td>
-                      <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{String(tx.account_no || '').slice(-8)}</td>
+                    <tr key={tx.id} className="table-row">
+                      <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">#{tx.id}</td>
+                      <td className="px-5 py-3 font-mono text-[12px] text-[#8890a0]">{String(tx.account_number || '').slice(-8)}</td>
                       <td className="px-5 py-3 font-700 text-white">{formatCurrency(tx.amount)}</td>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
@@ -119,6 +138,5 @@ export default function FraudPage() {
         </div>
 
       </div>
-    
   )
 }

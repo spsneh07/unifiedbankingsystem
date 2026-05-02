@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
-import { mockTransactions, mockAccounts, mockCustomers, mockBranches, formatCurrency } from '@/lib/mockData'
+import { mockTransactions, mockAccounts, mockCustomers, mockBranches } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 import { Play, Terminal, ChevronDown, ChevronUp, Database } from 'lucide-react'
 
 interface Query {

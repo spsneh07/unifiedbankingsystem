@@ -7,7 +7,7 @@ import {
   Bell, LogOut, ChevronLeft, ChevronRight, Landmark
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { mockAlerts } from '@/lib/mockData'
+// Alerts come from API
 import { clearSession, getSession } from '@/lib/auth'
 
 const allNav = [

@@ -1,134 +1,133 @@
-# 🏦 NexusBank — Unified Banking System
+# NexusBank — Unified Banking System
 
-[![Next.js](https://img.shields.io/badge/Next.js-15-black?style=flat-square&logo=next.js)](https://nextjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-38B2AC?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
-[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=flat-square&logo=mysql)](https://www.mysql.com/)
-
-NexusBank is a production-grade, full-stack banking ecosystem designed for scalability and performance. It features a sophisticated dashboard for customers, an administrative suite for employees/admins, and a robust data layer demonstrating advanced DBMS principles.
+A full-stack banking application with separated **Frontend** (Next.js) and **Backend** (Express + MySQL) architecture.
 
 ---
 
-## 🌟 Key Features
+## 📁 Project Structure
 
-- **🔐 Multi-Role Authentication**: Secure login/signup for Customers, Employees, and Admins with role-based dashboard redirection.
-- **📊 Interactive Analytics**: Real-time financial insights using Recharts.
-- **💳 Account Management**: Manage multiple accounts (Checking, Savings, etc.) with detailed transaction history.
-- **💸 Transaction Engine**: Support for deposits, withdrawals, and inter-account transfers.
-- **🕵️ Fraud Detection**: Intelligent risk scoring based on statistical analysis of transaction patterns.
-- **📅 Scheduled Payments**: Management of recurring transactions and scheduled transfers.
-- **📍 Branch Locator**: Interactive map integration for finding physical branches.
-- **🛠️ DBMS Query Visualizer**: Built-in tool for visualizing complex SQL operations and database health.
-
----
-
-## 🏗️ Architecture
-
-NexusBank is currently transitioning from a monolithic Next.js architecture to a decoupled Full-Stack system.
-
-- **Frontend (`/nexusbank`)**: A high-performance Next.js 15 application utilizing the App Router and Server Components.
-- **Integrated Backend**: API routes located in `nexusbank/app/api` handle current production traffic, directly interfacing with MySQL.
-- **Standalone Backend (`/backend`)**: An Express.js microservice (in progress) designed to centralize business logic and improve horizontal scalability.
-
----
-
-## 🛠️ Tech Stack
-
-### **Frontend**
-- **Framework**: Next.js 15 (App Router)
-- **UI Library**: React 19
-- **Styling**: Tailwind CSS (Premium Dark Theme)
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-- **Data Viz**: Recharts
-- **Maps**: Leaflet / React Leaflet
-
-### **Backend & Database**
-- **Runtime**: Node.js
-- **Framework**: Express.js (Migration target)
-- **Database**: MySQL 8.0+
-- **Driver**: `mysql2/promise`
-- **Auth**: Custom implementation using `bcryptjs` for hashing and cookie-based sessions.
+```
+unifiedbankingsystem/
+├── backend/                    # Express API Server
+│   ├── controllers/            # Business logic
+│   │   ├── authController.js
+│   │   ├── accountsController.js
+│   │   ├── transactionsController.js
+│   │   ├── dashboardController.js
+│   │   ├── customersController.js
+│   │   ├── alertsController.js
+│   │   ├── loansController.js
+│   │   ├── creditCardsController.js
+│   │   ├── creditScoreController.js
+│   │   ├── analyticsController.js
+│   │   ├── scheduledController.js
+│   │   └── branchesController.js
+│   ├── routes/                 # Express route definitions
+│   ├── db/                     # Database connection & init
+│   ├── middleware/             # Auth middleware
+│   ├── server.js              # Entry point
+│   ├── .env                   # Backend environment
+│   └── package.json
+│
+├── app/                        # Next.js Frontend (pages)
+│   ├── (customer)/            # Customer views
+│   ├── admin/                 # Admin views
+│   ├── employee/              # Employee views
+│   ├── auth/                  # Auth pages (login)
+│   └── branches/              # Branch locator
+│
+├── components/                 # React UI components
+├── lib/                        # Frontend utilities
+│   ├── utils.ts               # formatCurrency, maskAccountNo
+│   ├── auth.ts                # Session management
+│   └── api.ts                 # API helper (points to backend)
+│
+├── next.config.js             # Proxies /api/* to Express backend
+├── .env.local                 # Frontend environment
+└── package.json               # Frontend dependencies
+```
 
 ---
 
 ## 🚀 Getting Started
 
-### 1. Prerequisites
-- Node.js (v18 or higher)
-- MySQL Server (running locally or remotely)
-
-### 2. Environment Configuration
-Create a `.env.local` file in the `/nexusbank` directory:
-
-```env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_password
-DB_NAME=banking_db
-SESSION_SECRET=your_secret_key
-```
-
-### 3. Database Initialization
-NexusBank includes an automated script to set up your database schema and seed initial mock data.
+### 1. Initialize Database
 
 ```bash
-cd nexusbank
-npm run init-db  # Runs the lib/initDb.ts script
-```
-
-### 4. Install & Run
-```bash
-# Install dependencies
+cd backend
 npm install
+node db/initDb.js
+```
 
-# Start development server
+### 2. Start Backend (Express API — Port 5000)
+
+```bash
+cd backend
+node server.js
+```
+
+### 3. Start Frontend (Next.js — Port 3000)
+
+```bash
+# From root directory
 npm run dev
 ```
 
+### 4. Open
+
+Visit [http://localhost:3000](http://localhost:3000)
+
 ---
 
-## 📂 Project Structure
+## 🔐 Default Credentials
 
-```text
-nexusbank/
-├── app/                  # Next.js App Router
-│   ├── (auth)/           # Authentication pages (Login/Signup)
-│   ├── (customer)/       # Customer dashboard & features
-│   ├── admin/            # Administrative management
-│   └── api/              # Integrated Backend API Routes
-├── components/           # Reusable UI components
-│   ├── layout/           # Sidebar, Header, Sidebar
-│   └── charts/           # Analytics visualizations
-├── lib/                  # Database config & utility functions
-├── public/               # Static assets
-└── proxy.ts              # Role-based middleware & routing logic
+| Role     | Email                    | Password    |
+|----------|--------------------------|-------------|
+| Admin    | admin@nexusbank.com      | admin       |
+| Customer | customer@nexusbank.com   | password    |
+| Employee | employee@nexusbank.com   | employee123 |
+
+---
+
+## 🔌 API Endpoints
+
+All API routes are served from the Express backend on port 5000:
+
+| Method | Endpoint               | Description                |
+|--------|------------------------|----------------------------|
+| POST   | /api/auth/login        | User login                 |
+| POST   | /api/auth/signup       | User registration          |
+| POST   | /api/auth/forgot-password | Request password reset  |
+| POST   | /api/auth/reset-password  | Reset password           |
+| GET    | /api/dashboard         | Dashboard stats            |
+| GET    | /api/accounts          | List accounts              |
+| POST   | /api/accounts          | Create account             |
+| GET    | /api/transactions      | List transactions          |
+| POST   | /api/transactions      | Create transaction         |
+| GET    | /api/customers         | List customers (admin)     |
+| POST   | /api/customers         | Create customer            |
+| PUT    | /api/customers         | Update customer            |
+| GET    | /api/alerts            | Get alerts                 |
+| PATCH  | /api/alerts            | Mark alerts read           |
+| GET    | /api/loans             | List loans                 |
+| POST   | /api/loans             | Apply/approve/reject loan  |
+| GET    | /api/credit-cards      | List credit cards          |
+| POST   | /api/credit-cards      | Spend/pay/apply card       |
+| GET    | /api/credit-score      | Get credit score           |
+| GET    | /api/analytics         | Get analytics data         |
+| GET    | /api/scheduled         | List scheduled payments    |
+| POST   | /api/scheduled         | Create/toggle scheduled    |
+| GET    | /api/branches          | List branches              |
+
+---
+
+## 🏗️ Architecture
+
+```
+Browser → Next.js (Port 3000) → Proxy Rewrite → Express (Port 5000) → MySQL
 ```
 
----
-
-## 🎓 DBMS Concepts Demonstrated
-
-NexusBank is designed to showcase core database management principles:
-
-| Concept | Implementation |
-|---|---|
-| **Triggers** | Automated balance updates on transaction insertion. |
-| **Views** | Virtual tables for `high_value_customers` and `monthly_trends`. |
-| **Stored Procedures** | Encapsulated logic for complex inter-bank transfers. |
-| **ACID Compliance** | Transactional integrity during fund transfers. |
-| **Subqueries** | Dynamic filtering for fraud detection (e.g., `amount > 3x AVG`). |
-
----
-
-## 🔒 Security
-
-- **Password Hashing**: Bcrypt with unique salts for every user.
-- **Session Security**: HTTP-only cookies to prevent XSS-based token theft.
-- **Data Isolation**: Multi-tenant architecture ensuring customers only see their own financial data.
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+- **Frontend**: Only handles UI rendering and makes `fetch('/api/...')` calls
+- **Backend**: Handles all business logic, database queries, and authentication
+- **Proxy**: `next.config.js` rewrites `/api/*` requests to the Express backend
+- **Database**: MySQL with 13 tables (users, customers, accounts, transactions, etc.)

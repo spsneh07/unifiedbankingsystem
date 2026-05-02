@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { Briefcase, Users, CreditCard, ArrowLeftRight, TrendingUp } from 'lucide-react'
-import { formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 
 export default function EmployeeDashboard() {
   const [data, setData] = useState<any>(null)

@@ -4,7 +4,7 @@ import { MonthlyBarChart, TrendLineChart } from '@/components/charts/Charts'
 import { CategoryPieChart } from '@/components/charts/CategoryPieChart'
 import StatCard from '@/components/ui/StatCard'
 import { Wallet, TrendingUp, ArrowLeftRight, PieChart as PieIcon } from 'lucide-react'
-import { formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 
 const CATEGORY_COLORS: Record<string, string> = {
   Salary: '#00d4aa', Food: '#f5c542', Bills: '#6c63ff',

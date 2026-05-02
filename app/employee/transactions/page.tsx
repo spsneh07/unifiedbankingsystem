@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
-import { formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 import { Plus, AlertTriangle } from 'lucide-react'
 
 type TxType = 'deposit' | 'withdraw' | 'transfer'

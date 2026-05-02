@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { ShieldCheck, Users, CreditCard, ArrowLeftRight, AlertTriangle, TrendingUp } from 'lucide-react'
-import { formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 
 export default function AdminDashboard() {
   const [data, setData] = useState<any>(null)

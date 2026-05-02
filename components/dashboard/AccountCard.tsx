@@ -1,6 +1,6 @@
 import { CreditCard, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { formatCurrency, maskAccountNo } from '@/lib/mockData'
+import { formatCurrency, maskAccountNo } from '@/lib/utils'
 
 const bankColors: Record<string, { from: string; to: string; badge: string }> = {
   SBI: { from: 'rgba(0,212,170,0.08)', to: 'rgba(0,212,170,0.03)', badge: '#00d4aa' },

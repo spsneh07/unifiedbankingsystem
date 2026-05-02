@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
-import { formatCurrency, maskAccountNo } from '@/lib/mockData'
+import { formatCurrency, maskAccountNo } from '@/lib/utils'
 import { Plus, Filter } from 'lucide-react'
 
 const BANKS = ['SBI','HDFC','ICICI','Axis','Kotak','Yes Bank','IndusInd','IDFC First','Canara Bank','Punjab National Bank'];

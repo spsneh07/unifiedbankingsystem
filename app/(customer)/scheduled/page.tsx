@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Badge from '@/components/ui/Badge';
-import { formatCurrency } from '@/lib/mockData';
+import { formatCurrency } from '@/lib/utils';
 import { CalendarClock, Zap, Home, Shield, RefreshCw, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import Modal from '@/components/ui/Modal';

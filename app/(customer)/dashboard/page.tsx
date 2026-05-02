@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import StatCard from '@/components/ui/StatCard'
 import AccountCard from '@/components/dashboard/AccountCard'
 import { MonthlyBarChart } from '@/components/charts/Charts'
-import { mockAnalytics, formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 import { Wallet, Users, ShieldAlert, TrendingUp, Loader2, ArrowRight } from 'lucide-react'
 import Badge from '@/components/ui/Badge'
 import { useState, useEffect } from 'react'
@@ -135,7 +135,7 @@ export default function DashboardPage() {
             <span className="text-[11px] font-600 text-[#8890a0] bg-white/5 px-2 py-1 rounded">Last 6 months</span>
           </div>
           <div className="h-[300px] min-h-[300px] w-full">
-            <MonthlyBarChart data={mockAnalytics.monthlySpending} />
+            <MonthlyBarChart data={[]} />
           </div>
         </motion.div>
 

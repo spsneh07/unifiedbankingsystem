@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
-import { formatCurrency } from '@/lib/mockData'
+import { formatCurrency } from '@/lib/utils'
 import { Plus, AlertTriangle, ArrowUpRight, ArrowDownLeft, ArrowRightLeft, Search, Filter, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
