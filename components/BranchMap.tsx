@@ -83,8 +83,9 @@ export default function BranchMap({ lat, lng, address, name, phone }: BranchMapP
         style={{ height: '400px', width: '100%', background: '#1a1d24' }}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; Google Maps'
+          url="http://mt0.google.com/vt/lyrs=m&hl=en&x={x}&y={y}&z={z}"
+          maxZoom={20}
         />
         <MapEvents center={position} />
         <Marker position={position}>

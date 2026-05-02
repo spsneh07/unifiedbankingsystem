@@ -24,10 +24,9 @@ export async function GET(request: Request) {
           customerId = user.customer_id;
         } else if (user.role === 'customer') {
           // AUTO-FIX: Lazy initialize customer profile
-          const aadhar = 'AD' + Math.floor(Math.random() * 100000000000).toString().padStart(12, '0');
           const customerRes: any = await query(
-            'INSERT INTO customers (name, email, phone, address, aadhar) VALUES (?, ?, ?, ?, ?)',
-            [user.email.split('@')[0], user.email, 'N/A', 'N/A', aadhar]
+            'INSERT INTO customers (user_id, first_name, last_name, phone, address) VALUES (?, ?, ?, ?, ?)',
+            [userId, user.email.split('@')[0], 'User', 'N/A', 'N/A']
           );
           customerId = customerRes.insertId;
           await query('UPDATE users SET customer_id = ? WHERE user_id = ?', [customerId, userId]);
@@ -35,8 +34,8 @@ export async function GET(request: Request) {
           // Create a default account for this lazily initialized customer
           const accountNo = 'ACC' + Math.floor(Math.random() * 1000000000).toString().padStart(10, '0');
           await query(
-            'INSERT INTO accounts (customer_id, account_no, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [customerId, accountNo, 1, 'SBI', 'Savings', 0, 'Active']
+            'INSERT INTO accounts (customer_id, account_number, type, balance, status) VALUES (?, ?, ?, ?, ?)',
+            [customerId, accountNo, 'savings', 0, 'active']
           );
         }
       }
@@ -49,16 +48,16 @@ export async function GET(request: Request) {
       const [c]: any = await query('SELECT COUNT(*) as totalCustomers FROM customers');
       
       const fraudAlerts = await query(`
-        SELECT t.*, a.account_no as account_no 
+        SELECT t.*, a.account_number as account_no 
         FROM transactions t 
-        LEFT JOIN accounts a ON t.account_id = a.account_id
+        LEFT JOIN accounts a ON t.account_id = a.id
         WHERE t.is_suspicious = 1
       `);
 
       const recentTx = await query(`
-        SELECT t.transaction_id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_no as account_no
+        SELECT t.id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
         FROM transactions t
-        LEFT JOIN accounts a ON t.account_id = a.account_id
+        LEFT JOIN accounts a ON t.account_id = a.id
         ORDER BY t.created_at DESC LIMIT 10
       `);
 
@@ -86,22 +85,22 @@ export async function GET(request: Request) {
     const customersResult = { totalCustomers: 1 };
     
     const fraudAlerts = await query(`
-      SELECT t.*, a.account_no as account_no 
+      SELECT t.*, a.account_number as account_no 
       FROM transactions t 
-      LEFT JOIN accounts a ON t.account_id = a.account_id
+      LEFT JOIN accounts a ON t.account_id = a.id
       WHERE t.is_suspicious = 1 AND a.customer_id = ?
     `, [customerId]);
 
     const recentTx = await query(`
-      SELECT t.transaction_id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_no as account_no
+      SELECT t.id as id, t.description, t.type, t.amount, t.created_at as transaction_date, a.account_number as account_no
       FROM transactions t
-      LEFT JOIN accounts a ON t.account_id = a.account_id
+      LEFT JOIN accounts a ON t.account_id = a.id
       WHERE a.customer_id = ?
       ORDER BY t.created_at DESC LIMIT 8
     `, [customerId]);
 
     const myAccounts = await query(`
-      SELECT account_id as id, account_no as account_no, balance, account_type as type, status FROM accounts WHERE customer_id = ? LIMIT 3
+      SELECT id as id, account_number as account_no, balance, type as type, status FROM accounts WHERE customer_id = ? LIMIT 3
     `, [customerId]);
 
     return NextResponse.json({

@@ -19,7 +19,7 @@ export async function GET() {
     }
 
     const customers = await query(`
-      SELECT customer_id as id, name, email, phone, address, aadhar as aadhar_number, created_at 
+      SELECT id as id, first_name as name, 'No Email' as email, phone, address, 'N/A' as aadhar_number, created_at 
       FROM customers 
       ORDER BY created_at DESC
     `);
@@ -45,8 +45,8 @@ export async function POST(req: Request) {
     }
 
     await query(
-      'INSERT INTO customers (name, email, phone, address, aadhar) VALUES (?, ?, ?, ?, ?)',
-      [name, email, phone, address, aadhar]
+      'INSERT INTO customers (user_id, first_name, last_name, phone, address) VALUES (?, ?, ?, ?, ?)',
+      [null, name, 'User', phone, address]
     );
 
     return NextResponse.json({ success: true, message: 'Customer created successfully' });
@@ -71,8 +71,8 @@ export async function PUT(req: Request) {
     }
 
     await query(
-      'UPDATE customers SET name = ?, email = ?, phone = ?, address = ?, aadhar = ? WHERE customer_id = ?',
-      [name, email, phone, address, aadhar, id]
+      'UPDATE customers SET first_name = ?, phone = ?, address = ? WHERE id = ?',
+      [name, phone, address, id]
     );
 
     return NextResponse.json({ success: true, message: 'Customer updated successfully' });

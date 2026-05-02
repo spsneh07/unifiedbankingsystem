@@ -73,7 +73,7 @@ export default function DashboardPage() {
         <ShieldAlert size={48} className="text-danger mb-4" />
         <h2 className="text-2xl font-display font-700 mb-2 tracking-tight">Account Setup Required</h2>
         <p className="text-[#8890a0] mb-6 max-w-md">Your customer profile is not fully initialized. Please contact support or try logging in again.</p>
-        <button onClick={() => window.location.href = '/login'} className="btn-primary">Back to Login</button>
+        <button onClick={() => window.location.href = '/auth/login'} className="btn-primary">Back to Login</button>
       </motion.div>
     )
   }

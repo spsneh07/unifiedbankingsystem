@@ -31,6 +31,7 @@ export default function AccountsPage() {
   const [customers, setCustomers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [newAcc, setNewAcc] = useState({ customer_id: '', bank_name: BANKS[0], account_type: 'Savings', initial_deposit: '' })
+  const [formError, setFormError] = useState('')
 
   const refreshData = () => {
     setLoading(true)
@@ -165,8 +166,13 @@ export default function AccountsPage() {
       </div>
 
       {/* Add Account Modal */}
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Open New Account">
+      <Modal open={showAdd} onClose={() => { setShowAdd(false); setFormError(''); }} title="Open New Account">
         <div className="space-y-4">
+          {formError && (
+            <div className="p-3 rounded-lg bg-[#f05050]/10 border border-[#f05050]/20 text-[12px] text-[#f05050]">
+              {formError}
+            </div>
+          )}
           <div>
             <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Customer</label>
             <select 

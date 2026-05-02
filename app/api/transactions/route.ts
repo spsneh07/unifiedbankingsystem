@@ -31,10 +31,10 @@ export async function GET(request: Request) {
     if ((userRole === 'admin' || userRole === 'employee') && !targetCustomerId) {
       // Return ALL transactions for admin/employee if no specific customer is requested
       const transactions = await query(`
-      SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, t.status, t.reference_id, a.account_no as account_number, c.name as customer_name 
+      SELECT t.id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, t.status, a.account_number, c.first_name as customer_name 
       FROM transactions t 
-      LEFT JOIN accounts a ON t.account_id = a.account_id
-      LEFT JOIN customers c ON a.customer_id = c.customer_id
+      LEFT JOIN accounts a ON t.account_id = a.id
+      LEFT JOIN customers c ON a.customer_id = c.id
       ORDER BY t.created_at DESC
       LIMIT 1000
     `);
@@ -44,9 +44,9 @@ export async function GET(request: Request) {
   if (!targetCustomerId) return NextResponse.json([]);
 
   const transactions = await query(`
-    SELECT t.transaction_id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, t.status, t.reference_id, a.account_no as account_number 
+    SELECT t.id as id, t.type, t.amount, t.description, t.created_at, t.is_suspicious, t.category, t.status, a.account_number 
     FROM transactions t 
-    LEFT JOIN accounts a ON t.account_id = a.account_id
+    LEFT JOIN accounts a ON t.account_id = a.id
     WHERE a.customer_id = ?
     ORDER BY t.created_at DESC
   `, [targetCustomerId]);
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'OTP verification required', requireOTP: true }, { status: 403 });
     }
 
-    const [account]: any = await query('SELECT balance, customer_id FROM accounts WHERE account_id = ?', [account_id]);
+    const [account]: any = await query('SELECT balance, customer_id FROM accounts WHERE id = ?', [account_id]);
     if (!account) return NextResponse.json({ success: false, error: 'Account not found' }, { status: 404 });
 
     const currentBalance = parseFloat(account.balance);
@@ -96,8 +96,8 @@ export async function POST(request: Request) {
 
     // STEP 1: Insert PENDING transaction
     const insertRes: any = await query(
-      'INSERT INTO transactions (account_id, type, amount, balance_after, description, category, status, reference_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', 
-      [account_id, type === 'deposit' ? 'Deposit' : (type === 'withdraw' ? 'Withdrawal' : 'Transfer'), txAmount, currentBalance, description || `${type} transaction`, safeCategory, 'PENDING', refId]
+      'INSERT INTO transactions (account_id, type, amount, description, category, status) VALUES (?, ?, ?, ?, ?, ?)', 
+      [account_id, type === 'deposit' ? 'Deposit' : (type === 'withdraw' ? 'Withdrawal' : 'Transfer'), txAmount, description || `${type} transaction`, safeCategory, 'PENDING']
     );
     const newTxId = insertRes.insertId;
 
@@ -124,19 +124,19 @@ export async function POST(request: Request) {
       let newBalance = currentBalance;
       if (type === 'deposit') {
         newBalance = currentBalance + txAmount;
-        await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, account_id]);
+        await query('UPDATE accounts SET balance = ? WHERE id = ?', [newBalance, account_id]);
       } else if (type === 'withdraw') {
         newBalance = currentBalance - txAmount;
-        await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, account_id]);
+        await query('UPDATE accounts SET balance = ? WHERE id = ?', [newBalance, account_id]);
       } else if (type === 'transfer') {
         newBalance = currentBalance - txAmount;
-        await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, account_id]);
-        await query('UPDATE accounts SET balance = balance + ? WHERE account_id = ?', [txAmount, receiver_account_id]);
+        await query('UPDATE accounts SET balance = ? WHERE id = ?', [newBalance, account_id]);
+        await query('UPDATE accounts SET balance = balance + ? WHERE id = ?', [txAmount, receiver_account_id]);
       }
 
-      await query('UPDATE transactions SET status = ?, balance_after = ?, is_suspicious = ? WHERE transaction_id = ?', ['SUCCESS', newBalance, isSuspicious, newTxId]);
+      await query('UPDATE transactions SET status = ?, is_suspicious = ? WHERE id = ?', ['SUCCESS', isSuspicious, newTxId]);
     } else {
-      await query('UPDATE transactions SET status = ? WHERE transaction_id = ?', ['FAILED', newTxId]);
+      await query('UPDATE transactions SET status = ? WHERE id = ?', ['FAILED', newTxId]);
     }
 
     // STEP 4: AUDIT LOG

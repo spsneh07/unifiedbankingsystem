@@ -84,17 +84,17 @@ export default function BranchesPage() {
           ) : (
             filteredBranches.map(branch => (
               <div 
-                key={branch.branch_id}
+                key={branch.id}
                 onClick={() => setSelectedBranch(branch)}
                 className={`card p-5 cursor-pointer transition-all border-2 ${
-                  selectedBranch?.branch_id === branch.branch_id 
+                  selectedBranch?.id === branch.id 
                     ? 'border-[#00d4aa] bg-[#00d4aa]/5' 
                     : 'border-transparent hover:border-white/10'
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                    selectedBranch?.branch_id === branch.branch_id ? 'bg-[#00d4aa] text-[#0a0c10]' : 'bg-[#1a1d24] text-[#8890a0]'
+                    selectedBranch?.id === branch.id ? 'bg-[#00d4aa] text-[#0a0c10]' : 'bg-[#1a1d24] text-[#8890a0]'
                   }`}>
                     <Landmark size={20} />
                   </div>

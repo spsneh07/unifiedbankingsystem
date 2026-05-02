@@ -30,10 +30,9 @@ export async function POST(req: Request) {
     const userId = result.insertId;
 
     if (userRole === 'customer') {
-      const finalAadhar = aadhar || ('AD' + Math.floor(Math.random() * 100000000000).toString().padStart(12, '0'));
       const customerRes: any = await query(
-        'INSERT INTO customers (name, email, phone, address, aadhar) VALUES (?, ?, ?, ?, ?)',
-        [name || email.split('@')[0], email, phone || 'N/A', address || 'N/A', finalAadhar]
+        'INSERT INTO customers (user_id, first_name, last_name, phone, address) VALUES (?, ?, ?, ?, ?)',
+        [userId, name || email.split('@')[0], 'User', phone || 'N/A', address || 'N/A']
       );
       const customerId = customerRes.insertId;
       await query('UPDATE users SET customer_id = ? WHERE user_id = ?', [customerId, userId]);
@@ -41,8 +40,8 @@ export async function POST(req: Request) {
       // Create a default Savings account
       const accountNo = 'ACC' + Math.floor(Math.random() * 1000000000).toString().padStart(10, '0');
       await query(
-        'INSERT INTO accounts (customer_id, account_no, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-        [customerId, accountNo, 1, 'SBI', 'Savings', 0, 'Active']
+        'INSERT INTO accounts (customer_id, account_number, type, balance, status) VALUES (?, ?, ?, ?, ?)',
+        [customerId, accountNo, 'Savings', 0, 'Active']
       );
     }
 

@@ -41,7 +41,7 @@ export async function GET(request: Request) {
         AVG(t.amount) as avg_amount,
         MAX(t.amount) as max_amount
       FROM transactions t
-      LEFT JOIN accounts a ON t.account_id = a.account_id
+      LEFT JOIN accounts a ON t.account_id = a.id
       ${whereClause}
       GROUP BY category
       ORDER BY total_amount DESC
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
         SUM(CASE WHEN t.type != 'deposit' THEN t.amount ELSE 0 END) as withdrawals,
         COUNT(*) as transaction_count
       FROM transactions t
-      LEFT JOIN accounts a ON t.account_id = a.account_id
+      LEFT JOIN accounts a ON t.account_id = a.id
       ${isGlobal ? 'WHERE' : whereClause + ' AND'} t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
       GROUP BY month_key, month
       ORDER BY month_key ASC
@@ -67,7 +67,7 @@ export async function GET(request: Request) {
         SUM(t.amount) as total_amount,
         COUNT(*) as count
       FROM transactions t
-      LEFT JOIN accounts a ON t.account_id = a.account_id
+      LEFT JOIN accounts a ON t.account_id = a.id
       ${isGlobal ? 'WHERE' : whereClause + ' AND'} t.type != 'deposit'
       GROUP BY category
       ORDER BY total_amount DESC
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
         COUNT(*) as count,
         SUM(t.amount) as total_amount
       FROM transactions t
-      LEFT JOIN accounts a ON t.account_id = a.account_id
+      LEFT JOIN accounts a ON t.account_id = a.id
       ${whereClause}
       GROUP BY t.type
     `, params);

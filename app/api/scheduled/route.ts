@@ -8,18 +8,18 @@ async function autoExecuteScheduledTransactions() {
   const pending: any = await query(`
     SELECT st.*, a.balance 
     FROM scheduled_transactions st
-    JOIN accounts a ON st.account_id = a.account_id
+    JOIN accounts a ON st.account_id = a.id
     WHERE st.is_active = 1 AND st.next_execution <= CURDATE()
   `);
 
   for (const st of pending) {
     const newBalance = parseFloat(st.balance) - parseFloat(st.amount);
-    await query('UPDATE accounts SET balance = ? WHERE account_id = ?', [newBalance, st.account_id]);
+    await query('UPDATE accounts SET balance = ? WHERE id = ?', [newBalance, st.account_id]);
     
     await query(`
-      INSERT INTO transactions (account_id, type, amount, balance_after, description, category, created_at)
-      VALUES (?, 'Withdrawal', ?, ?, ?, 'Bills', NOW())
-    `, [st.account_id, st.amount, newBalance, `Auto-pay: ${st.bill_type}`]);
+      INSERT INTO transactions (account_id, type, amount, description, category, created_at)
+      VALUES (?, 'Withdrawal', ?, ?, 'Bills', NOW())
+    `, [st.account_id, st.amount, `Auto-pay: ${st.bill_type}`]);
 
     let interval = '1 MONTH';
     if (st.frequency === 'weekly') interval = '1 WEEK';
@@ -52,9 +52,9 @@ export async function GET(request: Request) {
     if (!customerId) return NextResponse.json([]);
 
     const scheduled = await query(`
-      SELECT st.*, a.account_no
+      SELECT st.*, a.account_number as account_no
       FROM scheduled_transactions st
-      JOIN accounts a ON st.account_id = a.account_id
+      JOIN accounts a ON st.account_id = a.id
       WHERE a.customer_id = ?
       ORDER BY st.next_execution ASC
     `, [customerId]);

@@ -56,8 +56,8 @@ export default function TransactionsPage() {
       fetch(`/api/transactions?customerId=${user.customer_id}`, { cache: 'no-store' }).then(r => r.json()),
       fetch(`/api/accounts?customerId=${user.customer_id}`, { cache: 'no-store' }).then(r => r.json())
     ]).then(([txData, accData]) => {
-      setData(txData)
-      setAccounts(accData)
+      setData(Array.isArray(txData) ? txData : [])
+      setAccounts(Array.isArray(accData) ? accData : [])
       if (accData.length > 0) {
         setFromAccount(accData[0].id)
         setToAccount(accData[0].id)

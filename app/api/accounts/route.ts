@@ -34,9 +34,9 @@ export async function GET(request: Request) {
     if ((userRole === 'admin' || userRole === 'employee') && !targetCustomerId) {
       // Return ALL accounts for admin/employee if no specific customer is requested
       const accounts = await query(`
-        SELECT a.account_id as id, a.account_no as account_number, a.bank_name, a.account_type as type, a.balance, a.status, a.created_at, c.name as customer_name 
+        SELECT a.id as id, a.account_number as account_number, 'NexusBank' as bank_name, a.type as type, a.balance, a.status, a.created_at, c.first_name as customer_name 
         FROM accounts a 
-        LEFT JOIN customers c ON a.customer_id = c.customer_id
+        LEFT JOIN customers c ON a.customer_id = c.id
         ORDER BY a.created_at DESC
       `);
       return NextResponse.json(accounts);
@@ -45,9 +45,9 @@ export async function GET(request: Request) {
     if (!targetCustomerId) return NextResponse.json([]);
 
     const accounts = await query(`
-      SELECT a.account_id as id, a.account_no as account_number, a.bank_name, a.account_type as type, a.balance, a.status, a.created_at, c.name as customer_name 
+      SELECT a.id as id, a.account_number as account_number, 'NexusBank' as bank_name, a.type as type, a.balance, a.status, a.created_at, c.first_name as customer_name 
       FROM accounts a 
-      LEFT JOIN customers c ON a.customer_id = c.customer_id
+      LEFT JOIN customers c ON a.customer_id = c.id
       WHERE a.customer_id = ?
       ORDER BY a.created_at DESC
     `, [targetCustomerId]);
@@ -77,8 +77,8 @@ export async function POST(req: Request) {
     const account_no = `${bank_name.substring(0, 3).toUpperCase()}${Math.floor(1000000000 + Math.random() * 9000000000)}`;
 
     await query(
-      'INSERT INTO accounts (account_no, customer_id, branch_id, bank_name, account_type, balance, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [account_no, customer_id, branch_id || 1, bank_name, account_type, initial_deposit || 0, 'Active']
+      'INSERT INTO accounts (account_number, customer_id, type, balance, status) VALUES (?, ?, ?, ?, ?)',
+      [account_no, customer_id, account_type, initial_deposit || 0, 'Active']
     );
 
     return NextResponse.json({ success: true, message: 'Account created successfully', account_no });

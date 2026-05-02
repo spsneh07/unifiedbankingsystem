@@ -12,9 +12,9 @@ export async function GET(request: Request) {
 
     if (role === 'admin' || role === 'employee') {
       const loans = await query(`
-        SELECT l.*, c.name as customer_name, c.email as customer_email
+        SELECT l.*, c.first_name as customer_name, 'N/A' as customer_email
         FROM loans l
-        LEFT JOIN customers c ON l.customer_id = c.customer_id
+        LEFT JOIN customers c ON l.customer_id = c.id
         ORDER BY l.created_at DESC
       `);
       return NextResponse.json(loans);

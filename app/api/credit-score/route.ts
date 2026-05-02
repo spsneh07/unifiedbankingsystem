@@ -57,7 +57,7 @@ async function calculateScore(customerId: number): Promise<{
   const suspicious: any = await query(`
     SELECT COUNT(*) as cnt
     FROM transactions t
-    JOIN accounts a ON t.account_id = a.account_id
+    JOIN accounts a ON t.account_id = a.id
     WHERE a.customer_id = ? AND t.is_suspicious = 1
   `, [customerId]);
   const suspiciousCount = suspicious[0]?.cnt || 0;
@@ -77,9 +77,9 @@ export async function GET() {
 
     if (role === 'admin' || role === 'employee') {
       const scores = await query(`
-        SELECT cs.*, c.name as customer_name, c.email
+        SELECT cs.*, c.first_name as customer_name, 'N/A' as email
         FROM credit_scores cs
-        JOIN customers c ON cs.customer_id = c.customer_id
+        JOIN customers c ON cs.customer_id = c.id
         ORDER BY cs.score DESC
       `);
       return NextResponse.json(scores);
@@ -104,8 +104,7 @@ export async function GET() {
         score = VALUES(score),
         loan_repayment_factor = VALUES(loan_repayment_factor),
         credit_usage_factor = VALUES(credit_usage_factor),
-        missed_payments_factor = VALUES(missed_payments_factor),
-        last_calculated = CURRENT_TIMESTAMP
+        missed_payments_factor = VALUES(missed_payments_factor)
     `, [customerId, score, loan_repayment_factor, credit_usage_factor, missed_payments_factor]);
 
     return NextResponse.json({ score, loan_repayment_factor, credit_usage_factor, missed_payments_factor });

@@ -38,6 +38,7 @@ export default function AccountsPage() {
   const [branches, setBranches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ customer_id: '', bank_name: 'SBI', account_type: 'Savings', initial_deposit: '', branch_id: '' })
+  const [formError, setFormError] = useState('')
 
   const refreshData = () => {
     setLoading(true)
@@ -61,8 +62,9 @@ export default function AccountsPage() {
   }, [])
 
   const handleSubmit = async () => {
+    setFormError('')
     if (!formData.customer_id || !formData.bank_name || !formData.account_type || !formData.initial_deposit) {
-      alert('Please fill all required fields')
+      setFormError('Please fill all required fields')
       return
     }
 

@@ -11,8 +11,8 @@ export default function LoginPage() {
   const router = useRouter()
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [email, setEmail] = useState('admin@bank.com')
-  const [password, setPassword] = useState('password123')
+  const [email, setEmail] = useState('admin@nexusbank.com')
+  const [password, setPassword] = useState('admin')
   const [error, setError] = useState('')
 
   const handleLogin = async () => {
@@ -153,7 +153,7 @@ export default function LoginPage() {
           <div className="pt-4 border-t border-white/5">
             <p className="text-[10px] font-700 text-[#8890a0] text-center mb-3 uppercase tracking-widest">Demo access</p>
             <div className="grid grid-cols-3 gap-2">
-              {[{ role: 'Admin', email: 'admin@bank.com', pw: 'password123' }, { role: 'Employee', email: 'employee@bank.com', pw: 'password123' }, { role: 'Customer', email: 'arjun.mehta@gmail.com', pw: 'password123' }].map((d, i) => (
+              {[{ role: 'Admin', email: 'admin@nexusbank.com', pw: 'admin' }, { role: 'Employee', email: 'employee@nexusbank.com', pw: 'employee123' }, { role: 'Customer', email: 'customer@nexusbank.com', pw: 'password' }].map((d, i) => (
                 <motion.div 
                   key={d.role} 
                   initial={{ opacity: 0, y: 10 }}

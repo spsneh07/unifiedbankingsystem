@@ -35,6 +35,7 @@ export default function AccountsPage() {
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [formData, setFormData] = useState({ bank_name: 'SBI', account_type: 'Savings', initial_deposit: '', branch_id: '1' })
+  const [formError, setFormError] = useState('')
 
   const refreshData = () => {
     setLoading(true)
@@ -52,8 +53,9 @@ export default function AccountsPage() {
   }, [user?.id])
 
   const handleSubmit = async () => {
+    setFormError('')
     if (!formData.bank_name || !formData.account_type || !formData.initial_deposit) {
-      alert('Please fill all required fields')
+      setFormError('Please fill all required fields')
       return
     }
 
@@ -68,7 +70,7 @@ export default function AccountsPage() {
       setFormData({ bank_name: 'SBI', account_type: 'Savings', initial_deposit: '', branch_id: '1' })
       refreshData()
     } else {
-      alert(res.error || 'Failed to create account')
+      setFormError(res.error || 'Failed to create account')
     }
   }
 
@@ -167,8 +169,13 @@ export default function AccountsPage() {
       </div>
 
       {/* Add Account Modal */}
-      <Modal open={showAdd} onClose={() => setShowAdd(false)} title="Open New Account">
+      <Modal open={showAdd} onClose={() => { setShowAdd(false); setFormError(''); }} title="Open New Account">
         <div className="space-y-4">
+          {formError && (
+            <div className="p-3 rounded-lg bg-[#f05050]/10 border border-[#f05050]/20 text-[12px] text-[#f05050]">
+              {formError}
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-1">Bank</label>
