@@ -11,12 +11,16 @@ const pool = mysql.createPool({
   queueLimit: 0
 });
 
+pool.on('error', (err) => {
+  console.error('MySQL Pool Error:', err);
+});
+
 async function query(sql, params) {
   try {
     const [results] = await pool.execute(sql, params);
     return results;
   } catch (error) {
-    console.error('Database Query Error:', error.message);
+    console.error('Database Query Error:', error);
     throw error;
   }
 }

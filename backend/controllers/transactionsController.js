@@ -121,7 +121,8 @@ async function createTransaction(req, res) {
 
     return res.json({ success: true, transaction_id: newTxId, status: finalStatus, reference_id: refId, is_suspicious: isSuspicious === 1 });
   } catch (error) {
-    return res.status(500).json({ success: false, error: 'Transaction processing failed' });
+    console.error('Transaction Error:', error);
+    return res.status(500).json({ success: false, error: 'Transaction processing failed', details: error.message });
   }
 }
 

@@ -4,6 +4,7 @@ const crypto = require('crypto');
 
 async function login(req, res) {
   try {
+    console.log('Login attempt:', req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
