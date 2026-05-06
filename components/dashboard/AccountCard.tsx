@@ -1,5 +1,6 @@
 import { CreditCard, ArrowUpRight, ArrowDownLeft } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { formatCurrency, maskAccountNo } from '@/lib/utils'
 
 const bankColors: Record<string, { from: string; to: string; badge: string }> = {
@@ -18,8 +19,9 @@ interface Account {
 }
 
 export default function AccountCard({ account }: { account: Account }) {
+  const router = useRouter()
   const colors = bankColors[account.bank_name] || bankColors.SBI
-  const isActive = account.status === 'active'
+  const isActive = account.status?.toLowerCase() === 'active'
 
   return (
     <motion.div
@@ -62,6 +64,8 @@ export default function AccountCard({ account }: { account: Account }) {
           <motion.button 
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(0,212,170,0.1)' }}
             whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); router.push('/transactions?action=transfer'); }}
+            title="Transfer / Send"
             className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/5 transition-colors text-[#00d4aa]"
           >
             <ArrowUpRight size={14} />
@@ -69,6 +73,8 @@ export default function AccountCard({ account }: { account: Account }) {
           <motion.button 
             whileHover={{ scale: 1.1, backgroundColor: 'rgba(240,80,80,0.1)' }}
             whileTap={{ scale: 0.9 }}
+            onClick={(e) => { e.stopPropagation(); router.push('/transactions?action=deposit'); }}
+            title="Deposit"
             className="w-7 h-7 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/5 transition-colors text-[#f05050]"
           >
             <ArrowDownLeft size={14} />

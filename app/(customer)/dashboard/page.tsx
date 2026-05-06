@@ -135,7 +135,7 @@ export default function DashboardPage() {
             <span className="text-[11px] font-600 text-[#8890a0] bg-white/5 px-2 py-1 rounded">Last 6 months</span>
           </div>
           <div className="h-[300px] min-h-[300px] w-full">
-            <MonthlyBarChart data={[]} />
+            <MonthlyBarChart data={data.cashFlow || []} />
           </div>
         </motion.div>
 

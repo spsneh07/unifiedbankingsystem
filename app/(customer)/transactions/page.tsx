@@ -5,7 +5,7 @@ import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
 import { formatCurrency } from '@/lib/utils'
 import { Plus, AlertTriangle, ArrowUpRight, ArrowDownLeft, ArrowRightLeft, Search, Filter, Loader2 } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 type TxType = 'deposit' | 'withdraw' | 'transfer'
 
@@ -31,6 +31,7 @@ const rowVariants = {
 
 export default function TransactionsPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [modal, setModal] = useState<TxType | null>(null)
   const [typeFilter, setTypeFilter] = useState('All')
   const [catFilter, setCatFilter] = useState('All')
@@ -69,6 +70,14 @@ export default function TransactionsPage() {
   useEffect(() => {
     fetchData()
   }, [user?.customer_id])
+
+  // Auto-open modal from dashboard quick action buttons
+  useEffect(() => {
+    const action = searchParams.get('action')
+    if (action === 'deposit' || action === 'withdraw' || action === 'transfer') {
+      setModal(action as TxType)
+    }
+  }, [searchParams])
 
   if (loading) {
     return (

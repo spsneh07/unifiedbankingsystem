@@ -70,3 +70,4 @@ app.listen(PORT, () => {
   console.log(`  DB:      ${process.env.DB_NAME || 'banking_db'}`);
   console.log();
 });
+// trigger restart
