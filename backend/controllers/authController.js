@@ -88,12 +88,8 @@ async function login(req, res) {
       if (isBcrypt) {
         passwordMatch = await bcrypt.compare(password, user.password);
       } else {
-        // Legacy plaintext (dev seed only) — accept but note it
+        // Legacy plaintext
         passwordMatch = user.password === password;
-        if (passwordMatch && process.env.NODE_ENV === 'production') {
-          // Force reject plaintext passwords in production
-          return res.status(401).json({ success: false, error: 'Invalid email or password' });
-        }
       }
     }
 
