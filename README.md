@@ -2,7 +2,7 @@
 
 > A production-ready, full-stack Next.js banking application demonstrating secure authentication, atomic database transactions, role-based access control, and a dynamic, responsive UI.
 
-![NexusBank Dashboard](public/screenshot.png)
+![NexusBank Dashboard](public/screenshot.jpg)
 
 ---
 
