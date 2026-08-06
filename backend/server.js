@@ -214,13 +214,18 @@ app.use((err, req, res, next) => {
 });
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(JSON.stringify({
-    level: 'INFO',
-    message: 'NexusBank Backend started',
-    port: PORT,
-    db: process.env.DB_NAME || 'banking_db',
-    env: process.env.NODE_ENV || 'development',
-    timestamp: new Date().toISOString(),
-  }));
-});
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(JSON.stringify({
+      level: 'INFO',
+      message: 'NexusBank Backend started',
+      port: PORT,
+      db: process.env.DB_NAME || 'banking_db',
+      env: process.env.NODE_ENV || 'development',
+      timestamp: new Date().toISOString(),
+    }));
+  });
+}
+
+// Export the Express API for Vercel serverless execution
+module.exports = app;
