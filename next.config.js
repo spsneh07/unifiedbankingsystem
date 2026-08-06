@@ -34,7 +34,16 @@ const nextConfig = {
   },
 
   async rewrites() {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    let apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    
+    // Automatically add https:// if the user forgot it in Vercel env vars
+    if (!apiUrl.startsWith('http')) {
+      apiUrl = `https://${apiUrl}`;
+    }
+    
+    // Remove any trailing slash to prevent double slashes in the destination
+    apiUrl = apiUrl.replace(/\/$/, '');
+
     return [
       {
         source: '/api/:path*',
