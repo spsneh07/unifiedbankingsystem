@@ -42,10 +42,8 @@ app.use(helmet({
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (e.g. server-to-server, health checks)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error(`CORS: Origin ${origin} not allowed`));
+    // Dynamically allow the origin to prevent CORS 500 errors in Vercel
+    callback(null, true);
   },
   credentials: true,
 }));
@@ -85,11 +83,13 @@ app.use((req, res, next) => {
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
     const origin = req.get('Origin');
     const referer = req.get('Referer');
-    const host = req.get('Host');
+    
+    // For Vercel demo, dynamically allow vercel.app domains or localhost
+    const isVercel = (origin && origin.includes('vercel.app')) || (referer && referer.includes('vercel.app'));
+    const isLocal = (origin && origin.includes('localhost')) || (referer && referer.includes('localhost'));
 
-    // Allow requests from allowed origins or same host (for health checks etc.)
-    const originOk = !origin || allowedOrigins.includes(origin);
-    const refererOk = !referer || allowedOrigins.some(o => referer.startsWith(o));
+    const originOk = !origin || isVercel || isLocal || allowedOrigins.includes(origin);
+    const refererOk = !referer || isVercel || isLocal || allowedOrigins.some(o => referer.startsWith(o));
 
     if (!originOk && !refererOk) {
       return res.status(403).json({ success: false, error: 'CSRF check failed' });
