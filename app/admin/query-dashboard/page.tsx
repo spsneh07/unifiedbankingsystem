@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { mockTransactions, mockAccounts, mockCustomers, mockBranches } from '@/lib/mockData'
 import { formatCurrency } from '@/lib/utils'
 import { Play, Terminal, ChevronDown, ChevronUp, Database } from 'lucide-react'
 
@@ -10,11 +9,10 @@ interface Query {
   concept: string
   description: string
   sql: string
-  run: () => any[]
   columns: string[]
 }
 
-const avgBalance = mockAccounts.reduce((s, a) => s + a.balance, 0) / mockAccounts.length
+const avgBalance = 10000; // Hardcoded fallback for description
 
 const queries: Query[] = [
   {
@@ -23,19 +21,6 @@ const queries: Query[] = [
     concept: 'JOIN',
     description: 'Joins customers, accounts, branches, and transactions in one query. Retrieves recent transactions with full context.',
     sql: `SELECT c.name, a.account_no,\n       t.amount, t.created_at AS transaction_date, t.type\nFROM customers c\nJOIN accounts a ON c.customer_id = a.customer_id\nJOIN transactions t ON a.account_id = t.account_id\nWHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)\nORDER BY t.created_at DESC;`,
-    run: () => mockTransactions.slice(0, 10).map(t => {
-      const acc = mockAccounts.find(a => a.account_id === t.account_id)!
-      const branch = mockBranches.find(b => b.branch_id === acc?.branch_id)
-      return {
-        name: t.customer_name,
-        account_no: t.account_no,
-        bank_name: acc?.bank_name,
-        branch_name: branch?.name || 'N/A',
-        amount: formatCurrency(t.amount),
-        date: new Date(t.transaction_date).toLocaleDateString('en-IN'),
-        type: t.type,
-      }
-    }),
     columns: ['Customer', 'Account No', 'Bank', 'Branch', 'Amount', 'Date', 'Type'],
   },
   {
@@ -44,16 +29,6 @@ const queries: Query[] = [
     concept: 'SUBQUERY',
     description: 'Uses a subquery to find accounts whose balance is greater than the average balance of all accounts. Avg balance: ' + formatCurrency(avgBalance),
     sql: `SELECT c.name, a.account_no, a.bank_name, a.balance\nFROM customers c\nJOIN accounts a ON c.customer_id = a.customer_id\nWHERE a.balance > (\n  SELECT AVG(balance) FROM accounts\n)\nORDER BY a.balance DESC;`,
-    run: () => mockAccounts
-      .filter(a => a.balance > avgBalance)
-      .sort((a, b) => b.balance - a.balance)
-      .map(a => ({
-        name: a.customer_name,
-        account_no: a.account_no,
-        bank: a.bank_name,
-        balance: formatCurrency(a.balance),
-        diff: `+${formatCurrency(a.balance - avgBalance)} above avg`,
-      })),
     columns: ['Customer', 'Account No', 'Bank', 'Balance', 'vs Average'],
   },
   {
@@ -62,15 +37,6 @@ const queries: Query[] = [
     concept: 'GROUP BY / HAVING',
     description: 'Groups accounts by branch, sums/averages balances, and filters branches with more than 1 account using HAVING clause.',
     sql: `SELECT b.name AS branch_name,\n       COUNT(DISTINCT a.account_id) AS total_accounts,\n       SUM(a.balance) AS total_balance,\n       AVG(a.balance) AS avg_balance\nFROM branches b\nJOIN accounts a ON b.branch_id = a.branch_id\nGROUP BY b.branch_id\nHAVING total_accounts > 1\nORDER BY total_balance DESC;`,
-    run: () => mockBranches.map(b => {
-      const accs = mockAccounts.filter(a => a.branch_id === b.branch_id)
-      return {
-        branch: b.name,
-        total_accounts: accs.length,
-        total_balance: formatCurrency(accs.reduce((s, a) => s + a.balance, 0)),
-        avg_balance: formatCurrency(accs.length ? accs.reduce((s, a) => s + a.balance, 0) / accs.length : 0),
-      }
-    }).filter(r => r.total_accounts > 1).sort((a, b) => b.total_accounts - a.total_accounts),
     columns: ['Branch', 'Total Accounts', 'Total Balance', 'Avg Balance'],
   },
   {
@@ -79,19 +45,6 @@ const queries: Query[] = [
     concept: 'VIEW',
     description: 'Creates a view called high_balance_accounts for accounts with balance > ₹1,00,000. Views simplify complex queries into reusable virtual tables.',
     sql: `-- Create the view\nCREATE VIEW high_balance_accounts AS\nSELECT a.account_no, a.balance, a.bank_name,\n       c.name AS customer_name, c.email\nFROM accounts a\nJOIN customers c ON a.customer_id = c.customer_id\nWHERE a.balance > 100000;\n\n-- Query the view\nSELECT * FROM high_balance_accounts\nORDER BY balance DESC;`,
-    run: () => mockAccounts
-      .filter(a => a.balance > 100000)
-      .sort((a, b) => b.balance - a.balance)
-      .map(a => {
-        const cust = mockCustomers.find(c => c.customer_id === a.customer_id)
-        return {
-          account_no: a.account_no,
-          balance: formatCurrency(a.balance),
-          bank: a.bank_name,
-          customer: a.customer_name,
-          email: cust?.email || '',
-        }
-      }),
     columns: ['Account No', 'Balance', 'Bank', 'Customer', 'Email'],
   },
   {
@@ -100,19 +53,6 @@ const queries: Query[] = [
     concept: 'STORED PROCEDURE',
     description: 'Simulates calling a stored procedure that retrieves all transactions for a given customer ID. Procedures encapsulate reusable SQL logic.',
     sql: `DELIMITER $$\nCREATE PROCEDURE GetCustomerTransactions(IN customerId INT)\nBEGIN\n  SELECT t.transaction_id, t.amount, t.type,\n         t.created_at AS transaction_date, a.account_no\n  FROM transactions t\n  JOIN accounts a ON t.account_id = a.account_id\n  WHERE a.customer_id = customerId\n  ORDER BY t.created_at DESC;\nEND$$\nDELIMITER ;\n\n-- Execute for customer #1\nCALL GetCustomerTransactions(1);`,
-    run: () => {
-      const custAccounts = mockAccounts.filter(a => a.customer_id === 1).map(a => a.account_id)
-      return mockTransactions
-        .filter(t => custAccounts.includes(t.account_id))
-        .map(t => ({
-          tx_id: `#${t.transaction_id}`,
-          amount: formatCurrency(t.amount),
-          type: t.type,
-          date: new Date(t.transaction_date).toLocaleDateString('en-IN'),
-          account_no: t.account_no,
-          bank: mockAccounts.find(a => a.account_id === t.account_id)?.bank_name,
-        }))
-    },
     columns: ['TX ID', 'Amount', 'Type', 'Date', 'Account No', 'Bank'],
   },
   {
@@ -121,16 +61,6 @@ const queries: Query[] = [
     concept: 'TRIGGER',
     description: 'Simulates a BEFORE/AFTER INSERT trigger on transactions table that automatically updates the account balance. Shows before/after balance comparison.',
     sql: `-- Trigger definition\nCREATE TRIGGER after_transaction_insert\nAFTER INSERT ON transactions\nFOR EACH ROW\nBEGIN\n  IF NEW.type = 'deposit' THEN\n    UPDATE accounts\n    SET balance = balance + NEW.amount\n    WHERE account_id = NEW.account_id;\n  ELSEIF NEW.type = 'withdraw' THEN\n    UPDATE accounts\n    SET balance = balance - NEW.amount\n    WHERE account_id = NEW.account_id;\n  END IF;\nEND;\n\n-- Simulation: INSERT then SELECT\nINSERT INTO transactions (account_id, type, amount)\nVALUES (1, 'deposit', 5000);\n-- Trigger fires → balance auto-updated`,
-    run: () => {
-      const simulatedDeposit = 5000
-      return mockAccounts.slice(0, 5).map(a => ({
-        account: String(a.account_no || '').slice(-8),
-        bank: a.bank_name,
-        before: formatCurrency(a.balance),
-        trigger_action: a.account_id === 1 ? `+${formatCurrency(simulatedDeposit)} (deposit)` : '—',
-        after: a.account_id === 1 ? formatCurrency(a.balance + simulatedDeposit) : formatCurrency(a.balance),
-      }))
-    },
     columns: ['Account', 'Bank', 'Balance Before', 'Trigger Action', 'Balance After'],
   },
 ]

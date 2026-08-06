@@ -1,7 +1,7 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getSession, UserRole } from '@/lib/auth'
+import { useSession, UserRole } from '@/components/SessionProvider'
 
 /**
  * Call at the top of any protected page.
@@ -11,20 +11,22 @@ import { getSession, UserRole } from '@/lib/auth'
  */
 export function useRequireAuth(allowedRoles?: UserRole[]) {
   const router = useRouter()
+  const { user, loading } = useSession()
 
   useEffect(() => {
-    const session = getSession()
+    if (loading) return // Wait for session to load
 
-    if (!session) {
+    if (!user) {
       router.replace('/auth/login')
       return
     }
 
-    if (allowedRoles && !allowedRoles.includes(session.role)) {
+    if (allowedRoles && !allowedRoles.includes(user.role)) {
       // Redirect to their own dashboard
-      router.replace('/dashboard')
+      const dashboardPath = user.role === 'admin' ? '/admin' : user.role === 'employee' ? '/employee' : '/dashboard'
+      router.replace(dashboardPath)
     }
-  }, [router])
+  }, [user, loading, router, allowedRoles])
 
-  return getSession()
+  return { user, loading }
 }

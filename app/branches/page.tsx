@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import BranchMap from '@/components/BranchMap';
 import { Landmark, MapPin, Phone, Clock, Search, Navigation, AlertCircle } from 'lucide-react';
@@ -11,7 +11,7 @@ export default function BranchesPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('/api/branches', { cache: 'no-store' })
+    fetch('/api/branches', { cache: 'no-store', credentials: 'include' })
       .then(async res => {
         if (!res.ok) {
            const errData = await res.json().catch(() => ({}));
@@ -203,3 +203,4 @@ export default function BranchesPage() {
     </div>
   );
 }
+

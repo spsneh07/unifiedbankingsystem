@@ -1,4 +1,5 @@
-'use client'
+﻿'use client'
+import { useSession } from '@/components/SessionProvider'
 import { useState, useEffect } from 'react'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
@@ -15,13 +16,13 @@ export default function CustomersPage() {
 
   const refreshData = () => {
     setLoading(true)
-    fetch('/api/customers', { cache: 'no-store' }).then(r => r.json()).then(d => {
+    fetch('/api/customers', { cache: 'no-store', credentials: 'include' }).then(r => r.json()).then(d => {
       setData(Array.isArray(d) ? d : [])
       setLoading(false)
     })
   }
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  const { user } = useSession()
   useEffect(() => {
     refreshData()
   }, [user?.id])
@@ -258,3 +259,6 @@ export default function CustomersPage() {
     
   )
 }
+
+
+

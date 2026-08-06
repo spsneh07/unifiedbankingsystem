@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react'
 import { formatCurrency } from '@/lib/utils'
 import { ShieldAlert, AlertTriangle, TrendingUp, Eye } from 'lucide-react'
@@ -10,7 +10,7 @@ export default function FraudPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/transactions', { cache: 'no-store' })
+    fetch('/api/transactions', { cache: 'no-store', credentials: 'include' })
       .then(r => r.json())
       .then(data => {
         setTransactions(Array.isArray(data) ? data : [])
@@ -140,3 +140,4 @@ export default function FraudPage() {
       </div>
   )
 }
+

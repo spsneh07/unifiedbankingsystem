@@ -1,11 +1,12 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
 import { formatCurrency } from '@/lib/utils'
-import { Plus, AlertTriangle, ArrowUpRight, ArrowDownLeft, ArrowRightLeft, Search, Filter, Loader2 } from 'lucide-react'
+import { Plus, AlertTriangle, ArrowUpRight, ArrowDownLeft, ArrowRightLeft, Search, Filter, Loader2, KeyRound } from 'lucide-react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useSession } from '@/components/SessionProvider'
 
 type TxType = 'deposit' | 'withdraw' | 'transfer'
 
@@ -29,9 +30,10 @@ const rowVariants = {
   visible: { opacity: 1, x: 0 }
 }
 
-export default function TransactionsPage() {
+function TransactionsPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { user } = useSession()
   const [modal, setModal] = useState<TxType | null>(null)
   const [typeFilter, setTypeFilter] = useState('All')
   const [catFilter, setCatFilter] = useState('All')
@@ -46,30 +48,31 @@ export default function TransactionsPage() {
   const [toAccount, setToAccount] = useState('')
   const [category, setCategory] = useState('Other')
   const [otp, setOtp] = useState('')
+  const [generatedOtp, setGeneratedOtp] = useState('')
+  const [otpLoading, setOtpLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
-  
-  const fetchData = () => {
+  const fetchData = useCallback(() => {
     if (!user?.customer_id) return;
     Promise.all([
-      fetch(`/api/transactions?customerId=${user.customer_id}`, { cache: 'no-store' }).then(r => r.json()),
-      fetch(`/api/accounts?customerId=${user.customer_id}`, { cache: 'no-store' }).then(r => r.json())
+      fetch(`/api/transactions?customerId=${user.customer_id}`, { cache: 'no-store', credentials: 'include' }).then(r => r.json()),
+      fetch(`/api/accounts?customerId=${user.customer_id}`, { cache: 'no-store', credentials: 'include' }).then(r => r.json())
     ]).then(([txData, accData]) => {
       setData(Array.isArray(txData) ? txData : [])
       setAccounts(Array.isArray(accData) ? accData : [])
-      if (accData.length > 0) {
-        setFromAccount(accData[0].id)
-        setToAccount(accData[0].id)
+      if (accData.length > 0 && !fromAccount) {
+        setFromAccount(String(accData[0].id))
+        setToAccount(String(accData[0].id))
       }
       setLoading(false)
-    })
-  }
+    }).catch(() => setLoading(false))
+  }, [user?.customer_id])
 
   useEffect(() => {
-    fetchData()
-  }, [user?.customer_id])
+    if (user) fetchData()
+    else setLoading(false)
+  }, [user, fetchData])
 
   // Auto-open modal from dashboard quick action buttons
   useEffect(() => {
@@ -78,6 +81,24 @@ export default function TransactionsPage() {
       setModal(action as TxType)
     }
   }, [searchParams])
+
+  const handleRequestOtp = async () => {
+    setOtpLoading(true)
+    setGeneratedOtp('')
+    try {
+      const res = await fetch('/api/otp/generate', { method: 'POST', credentials: 'include' })
+      const data = await res.json()
+      if (data.success) {
+        setGeneratedOtp(data.otp) // Demo: show OTP in UI
+        setOtp(data.otp)          // Auto-fill for convenience
+      } else {
+        setError('Failed to generate OTP. Please try again.')
+      }
+    } catch {
+      setError('OTP request failed.')
+    }
+    setOtpLoading(false)
+  }
 
   if (loading) {
     return (
@@ -104,17 +125,22 @@ export default function TransactionsPage() {
 
   const handleSubmit = async () => {
     setError('');
+    if (!amount || isNaN(parseFloat(amount)) || parseFloat(amount) <= 0) {
+      setError('Please enter a valid positive amount.')
+      return
+    }
     setActionLoading(true);
     
     try {
       const res = await fetch('/api/transactions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           type: modal,
           amount: parseFloat(amount),
-          account_id: fromAccount,
-          receiver_account_id: modal === 'transfer' ? toAccount : undefined,
+          account_id: parseInt(fromAccount),
+          receiver_account_id: modal === 'transfer' ? parseInt(toAccount) : undefined,
           description,
           category,
           otp: (modal === 'withdraw' || modal === 'transfer') ? otp : undefined
@@ -127,6 +153,7 @@ export default function TransactionsPage() {
         setAmount('');
         setDescription('');
         setOtp('');
+        setGeneratedOtp('');
         fetchData();
         router.refresh();
       } else {
@@ -322,7 +349,20 @@ export default function TransactionsPage() {
           </div>
           <div>
             <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2 uppercase tracking-wider">OTP Verification</label>
-            <input className="input focus:border-[#f05050]/50 transition-all" placeholder="Enter 6-digit OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
+            <div className="flex gap-2">
+              <input className="input focus:border-[#f05050]/50 transition-all flex-1" placeholder="Enter 6-digit OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />
+              <button
+                onClick={handleRequestOtp}
+                disabled={otpLoading}
+                className="px-3 py-2 rounded-lg bg-[#00d4aa]/10 border border-[#00d4aa]/20 text-[#00d4aa] text-[12px] font-bold flex items-center gap-1 hover:bg-[#00d4aa]/20 transition-all whitespace-nowrap"
+              >
+                {otpLoading ? <Loader2 size={12} className="animate-spin" /> : <KeyRound size={12} />}
+                {otpLoading ? '...' : 'Get OTP'}
+              </button>
+            </div>
+            {generatedOtp && (
+              <p className="mt-1.5 text-[11px] text-[#00d4aa] font-mono">Demo OTP: <span className="font-bold tracking-widest">{generatedOtp}</span> (auto-filled)</p>
+            )}
           </div>
           <div className="p-4 rounded-xl bg-[#f05050]/5 border border-[#f05050]/10 flex gap-3">
             <AlertTriangle size={18} className="text-[#f05050] shrink-0" />
@@ -368,7 +408,20 @@ export default function TransactionsPage() {
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2 uppercase tracking-wider">OTP</label>
-              <input className="input focus:border-[#4090f0]/50 transition-all" placeholder="6-digit" value={otp} onChange={(e) => setOtp(e.target.value)} />
+              <div className="flex gap-2">
+                <input className="input focus:border-[#4090f0]/50 transition-all flex-1" placeholder="6-digit" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                <button
+                  onClick={handleRequestOtp}
+                  disabled={otpLoading}
+                  className="px-3 py-2 rounded-lg bg-[#00d4aa]/10 border border-[#00d4aa]/20 text-[#00d4aa] text-[12px] font-bold flex items-center gap-1 hover:bg-[#00d4aa]/20 transition-all whitespace-nowrap"
+                >
+                  {otpLoading ? <Loader2 size={12} className="animate-spin" /> : <KeyRound size={12} />}
+                  {otpLoading ? '...' : 'Get OTP'}
+                </button>
+              </div>
+              {generatedOtp && (
+                <p className="mt-1.5 text-[11px] text-[#00d4aa] font-mono">Demo OTP: <span className="font-bold tracking-widest">{generatedOtp}</span> (auto-filled)</p>
+              )}
             </div>
             <div className="col-span-2">
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2 uppercase tracking-wider">Description</label>
@@ -391,5 +444,17 @@ export default function TransactionsPage() {
         </div>
       </Modal>
     </motion.div>
+  )
+}
+
+export default function TransactionsPage() {
+  return (
+    <Suspense fallback={
+      <div className="p-6 flex items-center justify-center h-[60vh]">
+        <Loader2 className="animate-spin h-8 w-8 text-[#00d4aa]" />
+      </div>
+    }>
+      <TransactionsPageInner />
+    </Suspense>
   )
 }

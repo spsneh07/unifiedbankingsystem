@@ -1,4 +1,5 @@
-'use client'
+﻿'use client'
+import { useSession } from '@/components/SessionProvider'
 import { useState, useEffect } from 'react'
 import Badge from '@/components/ui/Badge'
 import { Bell, AlertTriangle, Info, ShieldAlert, Check } from 'lucide-react'
@@ -9,7 +10,7 @@ export default function AlertsPage() {
   const [error, setError] = useState('')
 
   const fetchAlerts = () => {
-    fetch('/api/alerts', { cache: 'no-store' })
+    fetch('/api/alerts', { cache: 'no-store', credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         if (data.success) {
@@ -25,7 +26,7 @@ export default function AlertsPage() {
       })
   }
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  const { user } = useSession()
   useEffect(() => {
     fetchAlerts()
   }, [user?.id])
@@ -127,3 +128,6 @@ export default function AlertsPage() {
     
   )
 }
+
+
+

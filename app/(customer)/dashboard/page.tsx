@@ -9,6 +9,7 @@ import { Wallet, Users, ShieldAlert, TrendingUp, Loader2, ArrowRight } from 'luc
 import Badge from '@/components/ui/Badge'
 import { useState, useEffect } from 'react'
 import CreditScoreWidget from '@/components/dashboard/CreditScoreWidget'
+import { useSession } from '@/components/SessionProvider'
 
 function txBadge(type: string) {
   const t = type?.toLowerCase()
@@ -34,15 +35,15 @@ export default function DashboardPage() {
   const [bankFilter, setBankFilter] = useState('All')
   const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { user } = useSession()
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
   useEffect(() => {
     if (!user?.id) {
       setLoading(false);
       return;
     }
 
-    fetch(`/api/dashboard`, { cache: 'no-store' })
+    fetch(`/api/dashboard`, { cache: 'no-store', credentials: 'include' })
       .then(res => res.json())
       .then(res => {
         if (res.success) {

@@ -1,4 +1,5 @@
-'use client'
+﻿'use client'
+import { useSession } from '@/components/SessionProvider'
 import { useState, useEffect } from 'react'
 import { MonthlyBarChart, TrendLineChart } from '@/components/charts/Charts'
 import { CategoryPieChart } from '@/components/charts/CategoryPieChart'
@@ -21,9 +22,9 @@ export default function AdminAnalyticsPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'all' | 'spending'>('all')
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  const { user } = useSession()
   useEffect(() => {
-    fetch('/api/analytics', { cache: 'no-store' })
+    fetch('/api/analytics', { cache: 'no-store', credentials: 'include' })
       .then(r => r.json())
       .then(res => { if (res.success) setData(res.data); setLoading(false) })
       .catch(() => setLoading(false))
@@ -164,3 +165,6 @@ export default function AdminAnalyticsPage() {
     </div>
   )
 }
+
+
+

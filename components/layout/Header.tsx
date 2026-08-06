@@ -1,8 +1,9 @@
+'use client'
 import { Bell, Search, Moon, Sun, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
-import { getSession, clearSession, type SessionUser } from "@/lib/auth";
+import { useSession } from "@/components/SessionProvider";
 import { useRouter } from "next/navigation";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -15,16 +16,12 @@ const ROLE_COLORS: Record<string, string> = {
 export default function Header({ title }: { title?: string }) {
   const { theme, toggleTheme } = useTheme();
   const [unreadAlerts, setUnreadAlerts] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  const [session, setSession] = useState<SessionUser | null>(null);
+  const { user, logout } = useSession();
   const { toast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
-    setSession(getSession());
-
-    fetch("/api/alerts")
+    fetch("/api/alerts", { credentials: 'include' })
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -37,19 +34,14 @@ export default function Header({ title }: { title?: string }) {
       .catch(() => {});
   }, []);
 
-  const handleLogout = () => {
-    clearSession();
-    router.push("/");
+  const handleLogout = async () => {
+    await logout();
   };
 
-  const initials =
-    mounted && session?.email ? String(session.email).slice(0, 2).toUpperCase() : "UB";
-  const badgeColor =
-    mounted && session?.role
-      ? ROLE_COLORS[session.role] || "#00d4aa"
-      : "#00d4aa";
-  const displayEmail = mounted ? session?.email || "Guest" : "Guest";
-  const displayRole = mounted ? session?.role || "user" : "user";
+  const initials = user?.email ? String(user.email).slice(0, 2).toUpperCase() : "UB";
+  const badgeColor = user?.role ? ROLE_COLORS[user.role] || "#00d4aa" : "#00d4aa";
+  const displayEmail = user?.email || "Guest";
+  const displayRole = user?.role || "user";
 
   return (
     <motion.header 
@@ -94,7 +86,7 @@ export default function Header({ title }: { title?: string }) {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              {mounted && theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
             </motion.div>
           </AnimatePresence>
         </motion.button>

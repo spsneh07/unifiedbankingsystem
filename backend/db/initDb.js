@@ -1,4 +1,5 @@
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 async function initDb() {
@@ -159,9 +160,12 @@ async function initDb() {
   // Seed demo data
   const [users] = await connection.query('SELECT COUNT(*) as count FROM users');
   if (users[0].count === 0) {
-    await connection.query(`INSERT INTO users (email, password_hash, role, customer_id) VALUES ('admin@nexusbank.com', 'admin', 'admin', NULL)`);
-    await connection.query(`INSERT INTO users (email, password_hash, role, customer_id) VALUES ('customer@nexusbank.com', 'password', 'customer', 1)`);
-    await connection.query(`INSERT INTO users (email, password_hash, role, customer_id) VALUES ('employee@nexusbank.com', 'employee123', 'employee', NULL)`);
+    const adminHash = await bcrypt.hash('admin', 12);
+    const customerHash = await bcrypt.hash('password', 12);
+    const employeeHash = await bcrypt.hash('employee123', 12);
+    await connection.query(`INSERT INTO users (email, password_hash, role, customer_id) VALUES ('admin@nexusbank.com', '${adminHash}', 'admin', NULL)`);
+    await connection.query(`INSERT INTO users (email, password_hash, role, customer_id) VALUES ('customer@nexusbank.com', '${customerHash}', 'customer', 1)`);
+    await connection.query(`INSERT INTO users (email, password_hash, role, customer_id) VALUES ('employee@nexusbank.com', '${employeeHash}', 'employee', NULL)`);
 
     await connection.query(`INSERT INTO customers (user_id, first_name, last_name, phone) VALUES (2, 'John', 'Doe', '555-0100')`);
     await connection.query(`INSERT INTO accounts (customer_id, account_number, type, balance) VALUES (1, 'ACC1001', 'checking', 5000.00)`);

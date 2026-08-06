@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import Badge from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/utils';
@@ -22,7 +22,7 @@ export default function CreditCardsPage() {
 
   const loadCards = () => {
     setLoading(true);
-    fetch('/api/credit-cards', { cache: 'no-store' })
+    fetch('/api/credit-cards', { cache: 'no-store', credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setCards(Array.isArray(data) ? data : []);
@@ -278,3 +278,4 @@ export default function CreditCardsPage() {
     </div>
   );
 }
+

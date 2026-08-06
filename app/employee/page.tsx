@@ -1,4 +1,5 @@
-'use client'
+﻿'use client'
+import { useSession } from '@/components/SessionProvider'
 import { useState, useEffect } from 'react'
 import { Briefcase, Users, CreditCard, ArrowLeftRight, TrendingUp } from 'lucide-react'
 import { formatCurrency } from '@/lib/utils'
@@ -6,9 +7,9 @@ import { formatCurrency } from '@/lib/utils'
 export default function EmployeeDashboard() {
   const [data, setData] = useState<any>(null)
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  const { user } = useSession()
   useEffect(() => {
-    fetch('/api/dashboard', { cache: 'no-store' }).then(r => r.json()).then(r => { if (r.success) setData(r.data) }).catch(() => {})
+    fetch('/api/dashboard', { cache: 'no-store', credentials: 'include' }).then(r => r.json()).then(r => { if (r.success) setData(r.data) }).catch(() => {})
   }, [user?.id])
 
   const stats = data ? [
@@ -50,3 +51,6 @@ export default function EmployeeDashboard() {
     </div>
   )
 }
+
+
+

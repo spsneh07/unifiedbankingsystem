@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import { useState, useEffect } from 'react';
 import Badge from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/utils';
@@ -33,7 +33,7 @@ export default function LoansPage() {
 
   const loadLoans = () => {
     setLoading(true);
-    fetch('/api/loans', { cache: 'no-store' })
+    fetch('/api/loans', { cache: 'no-store', credentials: 'include' })
       .then(res => res.json())
       .then(data => {
         setLoans(Array.isArray(data) ? data : []);
@@ -207,3 +207,4 @@ export default function LoansPage() {
     </div>
   );
 }
+

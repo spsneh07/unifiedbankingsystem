@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect } from 'react'
 import Modal from '@/components/ui/Modal'
 import Badge from '@/components/ui/Badge'
@@ -43,9 +43,9 @@ export default function AccountsPage() {
   const refreshData = () => {
     setLoading(true)
     Promise.all([
-      fetch('/api/accounts', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/customers', { cache: 'no-store' }).then(r => r.json()),
-      fetch('/api/branches', { cache: 'no-store' }).then(r => r.json())
+      fetch('/api/accounts', { cache: 'no-store', credentials: 'include' }).then(r => r.json()),
+      fetch('/api/customers', { cache: 'no-store', credentials: 'include' }).then(r => r.json()),
+      fetch('/api/branches', { cache: 'no-store', credentials: 'include' }).then(r => r.json())
     ]).then(([accountsData, customersData, branchesData]) => {
       setData(Array.isArray(accountsData) ? accountsData : [])
       setCustomers(Array.isArray(customersData) ? customersData : [])
@@ -244,4 +244,5 @@ export default function AccountsPage() {
     
   )
 }
+
 

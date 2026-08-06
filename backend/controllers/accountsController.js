@@ -43,9 +43,18 @@ async function createAccount(req, res) {
     const user = req.user;
     if (!user) return res.status(401).json({ success: false, error: 'Unauthorized' });
 
-    const { customer_id, bank_name, account_type, initial_deposit } = req.body;
+    const { bank_name, account_type, initial_deposit } = req.body;
+    let targetCustomerId = req.body.customer_id;
 
-    if (!customer_id || !bank_name || !account_type) {
+    // Security: If user is a customer, they can ONLY create accounts for themselves
+    if (user.role === 'customer') {
+      targetCustomerId = user.customer_id;
+    } else if (!targetCustomerId) {
+      // Admin/Employee must specify who the account is for
+      return res.status(400).json({ success: false, error: 'Customer ID is required' });
+    }
+
+    if (!targetCustomerId || !bank_name || !account_type) {
       return res.status(400).json({ success: false, error: 'Missing required fields' });
     }
 
@@ -53,7 +62,7 @@ async function createAccount(req, res) {
 
     await query(
       'INSERT INTO accounts (account_number, customer_id, type, balance, status) VALUES (?, ?, ?, ?, ?)',
-      [account_no, customer_id, account_type, initial_deposit || 0, 'Active']
+      [account_no, targetCustomerId, account_type, initial_deposit || 0, 'Active']
     );
 
     return res.json({ success: true, message: 'Account created successfully', account_no });

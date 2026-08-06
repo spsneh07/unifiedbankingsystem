@@ -1,4 +1,5 @@
 'use client';
+import { useSession } from '@/components/SessionProvider';
 import { useState, useEffect } from 'react';
 import Badge from '@/components/ui/Badge';
 import { formatCurrency } from '@/lib/utils';
@@ -27,16 +28,16 @@ export default function ScheduledPage() {
 
   const loadData = () => {
     setLoading(true);
-    fetch('/api/scheduled', { cache: 'no-store' })
+    fetch('/api/scheduled', { cache: 'no-store', credentials: 'include' })
       .then(res => res.json())
       .then(data => { setSchedules(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   };
 
-  const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+  const { user } = useSession()
   useEffect(() => {
     loadData();
-    fetch('/api/accounts', { cache: 'no-store' }).then(r => r.json()).then(d => setAccounts(Array.isArray(d) ? d : []));
+    fetch('/api/accounts', { cache: 'no-store', credentials: 'include' }).then(r => r.json()).then(d => setAccounts(Array.isArray(d) ? d : []));
   }, [user?.id]);
 
   const handleToggle = async (id: number, currentActive: number) => {
@@ -209,3 +210,6 @@ export default function ScheduledPage() {
     </div>
   );
 }
+
+
+
