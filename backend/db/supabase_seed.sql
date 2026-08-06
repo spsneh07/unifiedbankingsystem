@@ -6,9 +6,9 @@
 -- Employee: employee123
 
 INSERT INTO users (user_id, email, password_hash, role, customer_id) VALUES 
-(1, 'admin@nexusbank.com', '$2a$12$Z0tT.p9p1J8m4l/7tU/gq.L1tT/j6W1O8R3tT/j6W1O8R3tT/j6W1', 'admin', NULL),
-(2, 'customer@nexusbank.com', '$2a$12$D2tT.p9p1J8m4l/7tU/gq.L1tT/j6W1O8R3tT/j6W1O8R3tT/j6W1', 'customer', 1),
-(3, 'employee@nexusbank.com', '$2a$12$R0tT.p9p1J8m4l/7tU/gq.L1tT/j6W1O8R3tT/j6W1O8R3tT/j6W1', 'employee', NULL);
+(1, 'admin@nexusbank.com', '$2b$12$c.njhOqOhOjn9iTjpDLVBOb7oQt.p749DirIwRO4qoBe1SKRN3cOK', 'admin', NULL),
+(2, 'customer@nexusbank.com', '$2b$12$EvNM1Nh/VFgcm9yzZDFS9.EmEP9/15lD6i4Ko2jUo7m2S/4KTxydi', 'customer', 1),
+(3, 'employee@nexusbank.com', '$2b$12$mVLz.TIGZ4hIK.h1kULNIuN6tAEVDO5oIFSjpH.XFE.IkpEnZ.P1S', 'employee', NULL);
 
 INSERT INTO customers (id, user_id, first_name, last_name, phone) VALUES 
 (1, 2, 'John', 'Doe', '555-0100');
