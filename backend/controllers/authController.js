@@ -118,7 +118,7 @@ async function login(req, res) {
     return res.json({ success: true, user: userData });
   } catch (error) {
     console.error('Login error:', error);
-    return res.status(500).json({ success: false, error: 'Login failed. Please try again.' });
+    return res.status(500).json({ success: false, error: 'Login failed: ' + error.message, stack: error.stack });
   }
 }
 
