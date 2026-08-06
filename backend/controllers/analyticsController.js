@@ -31,15 +31,15 @@ async function getAnalytics(req, res) {
 
     const monthly = await query(`
       SELECT
-        DATE_FORMAT(t.created_at, '%b %Y') as month,
-        DATE_FORMAT(t.created_at, '%Y-%m') as month_key,
+        TO_CHAR(t.created_at, 'Mon YYYY') as month,
+        TO_CHAR(t.created_at, 'YYYY-MM') as month_key,
         SUM(CASE WHEN t.type = 'deposit' THEN t.amount ELSE 0 END) as deposits,
         SUM(CASE WHEN t.type != 'deposit' THEN t.amount ELSE 0 END) as withdrawals,
         COUNT(*) as transaction_count
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.id
-      ${isGlobal ? 'WHERE' : whereClause + ' AND'} t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-      GROUP BY month_key, month
+      ${isGlobal ? 'WHERE' : whereClause + ' AND'} t.created_at >= NOW() - INTERVAL '6 months'
+      GROUP BY TO_CHAR(t.created_at, 'YYYY-MM'), TO_CHAR(t.created_at, 'Mon YYYY')
       ORDER BY month_key ASC
     `, params);
 
@@ -74,7 +74,7 @@ async function getAnalytics(req, res) {
           (SELECT COUNT(*) FROM customers) as total_customers,
           (SELECT COUNT(*) FROM accounts) as total_accounts,
           (SELECT SUM(balance) FROM accounts) as total_liquidity,
-          (SELECT COUNT(*) FROM transactions WHERE created_at >= CURDATE()) as today_transactions
+          (SELECT COUNT(*) FROM transactions WHERE created_at >= CURRENT_DATE) as today_transactions
       `);
       globalStats = stats;
     }

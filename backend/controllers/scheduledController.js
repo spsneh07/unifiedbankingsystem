@@ -9,7 +9,7 @@ async function autoExecuteScheduledTransactions() {
       SELECT st.schedule_id, st.account_id, st.amount, st.frequency, st.bill_type, a.balance
       FROM scheduled_transactions st
       JOIN accounts a ON st.account_id = a.id
-      WHERE st.is_active = 1 AND st.next_execution <= CURDATE()
+      WHERE st.is_active = 1 AND st.next_execution <= CURRENT_DATE
       FOR UPDATE
     `);
 
@@ -38,7 +38,7 @@ async function autoExecuteScheduledTransactions() {
       if (st.frequency === 'daily') interval = 'INTERVAL 1 DAY';
 
       await conn.execute(
-        `UPDATE scheduled_transactions SET next_execution = DATE_ADD(next_execution, ${interval}) WHERE schedule_id = ?`,
+        `UPDATE scheduled_transactions SET next_execution = next_execution + ${interval} WHERE schedule_id = ?`,
         [st.schedule_id]
       );
     }
@@ -102,7 +102,7 @@ async function manageScheduled(req, res) {
       }
       await pool.execute(
         `INSERT INTO scheduled_transactions (account_id, amount, frequency, bill_type, start_date, next_execution, is_active)
-         VALUES (?, ?, ?, ?, CURDATE(), ?, 1)`,
+         VALUES (?, ?, ?, ?, CURRENT_DATE, ?, 1)`,
         [account_id, amtNum, frequency, bill_type, next_execution]
       );
       return res.json({ success: true, message: 'Scheduled transaction created' });

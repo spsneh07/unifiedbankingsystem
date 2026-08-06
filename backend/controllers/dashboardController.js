@@ -66,15 +66,17 @@ async function getDashboard(req, res) {
       `);
 
       const [cashFlow] = await pool.execute(`
-        SELECT
-          DATE_FORMAT(created_at, '%b') as month,
-          SUM(CASE WHEN LOWER(type) = 'deposit' THEN amount ELSE 0 END) as deposits,
-          SUM(CASE WHEN LOWER(type) != 'deposit' THEN amount ELSE 0 END) as withdrawals
+        SELECT 
+          EXTRACT(YEAR FROM created_at) as year, 
+          EXTRACT(MONTH FROM created_at) as month_num,
+          TO_CHAR(created_at, 'Mon') as month,
+          SUM(CASE WHEN type IN ('deposit', 'Deposit') THEN amount ELSE 0 END) as income,
+          SUM(CASE WHEN type IN ('withdrawal', 'Withdrawal', 'transfer', 'Transfer') THEN amount ELSE 0 END) as expenses
         FROM transactions
-        WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        WHERE created_at >= NOW() - INTERVAL '6 months'
           AND status = 'SUCCESS'
-        GROUP BY YEAR(created_at), MONTH(created_at), DATE_FORMAT(created_at, '%b')
-        ORDER BY YEAR(created_at) ASC, MONTH(created_at) ASC
+        GROUP BY EXTRACT(YEAR FROM created_at), EXTRACT(MONTH FROM created_at), TO_CHAR(created_at, 'Mon')
+        ORDER BY year ASC, month_num ASC
       `);
 
       return res.json({
@@ -132,17 +134,19 @@ async function getDashboard(req, res) {
     `, [customerId]);
 
     const [cashFlow] = await pool.execute(`
-      SELECT
-        DATE_FORMAT(t.created_at, '%b') as month,
-        SUM(CASE WHEN LOWER(t.type) = 'deposit' THEN t.amount ELSE 0 END) as deposits,
-        SUM(CASE WHEN LOWER(t.type) != 'deposit' THEN t.amount ELSE 0 END) as withdrawals
+      SELECT 
+        EXTRACT(YEAR FROM t.created_at) as year, 
+        EXTRACT(MONTH FROM t.created_at) as month_num,
+        TO_CHAR(t.created_at, 'Mon') as month,
+        SUM(CASE WHEN t.type IN ('deposit', 'Deposit') THEN t.amount ELSE 0 END) as income,
+        SUM(CASE WHEN t.type IN ('withdrawal', 'Withdrawal', 'transfer', 'Transfer') THEN t.amount ELSE 0 END) as expenses
       FROM transactions t
       JOIN accounts a ON t.account_id = a.id
-      WHERE t.created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-        AND a.customer_id = ?
+      WHERE t.created_at >= NOW() - INTERVAL '6 months'
         AND t.status = 'SUCCESS'
-      GROUP BY YEAR(t.created_at), MONTH(t.created_at), DATE_FORMAT(t.created_at, '%b')
-      ORDER BY YEAR(t.created_at) ASC, MONTH(t.created_at) ASC
+        AND a.customer_id = ?
+      GROUP BY EXTRACT(YEAR FROM t.created_at), EXTRACT(MONTH FROM t.created_at), TO_CHAR(t.created_at, 'Mon')
+      ORDER BY year ASC, month_num ASC
     `, [customerId]);
 
     return res.json({
