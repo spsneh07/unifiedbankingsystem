@@ -51,7 +51,7 @@ async function getDashboard(req, res) {
                a.account_number as account_no
         FROM transactions t
         LEFT JOIN accounts a ON t.account_id = a.id
-        WHERE t.is_suspicious = 1
+        WHERE t.is_suspicious = true
         ORDER BY t.created_at DESC
         LIMIT 50
       `);
@@ -111,7 +111,7 @@ async function getDashboard(req, res) {
              a.account_number as account_no
       FROM transactions t
       LEFT JOIN accounts a ON t.account_id = a.id
-      WHERE t.is_suspicious = 1 AND a.customer_id = ?
+      WHERE t.is_suspicious = true AND a.customer_id = ?
       ORDER BY t.created_at DESC LIMIT 20
     `, [customerId]);
 
