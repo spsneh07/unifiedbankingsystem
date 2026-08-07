@@ -4,8 +4,9 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
-import { saveSession, getDashboardByRole } from '@/lib/auth'
+import { getDashboardByRole } from '@/lib/auth'
 import Logo from '@/components/ui/Logo'
+import { useSession } from '@/components/SessionProvider'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('admin@nexusbank.com')
   const [password, setPassword] = useState('admin')
   const [error, setError] = useState('')
+  const { setUser } = useSession()
 
   const handleLogin = async () => {
     setLoading(true)
@@ -26,7 +28,7 @@ export default function LoginPage() {
       })
       const data = await res.json()
       if (data.success) {
-        saveSession(data.user)
+        setUser(data.user)
         router.replace(getDashboardByRole(data.user.role))
         router.refresh()
       } else {

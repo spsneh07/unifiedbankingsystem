@@ -1,5 +1,6 @@
 # 🚀 NexusBank — Unified Banking System
 
+**Live Demo:** [https://unifiedbankingsystem.vercel.app/](https://unifiedbankingsystem.vercel.app/)
 NexusBank is a next-generation unified banking dashboard that aggregates all your financial data into a single, comprehensive platform. With a strong focus on security, usability, and speed, NexusBank helps you manage accounts, schedule payments, transfer funds securely, and track analytics in real-time.
 
 ## ✨ Features

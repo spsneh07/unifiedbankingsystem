@@ -68,7 +68,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     document.cookie = 'ub_role=;path=/;max-age=0'
     document.cookie = 'ub_user_id=;path=/;max-age=0'
     document.cookie = 'ub_session=;path=/;max-age=0'
-    router.replace('/auth/login')
+    router.replace('/')
   }, [router])
 
   return (

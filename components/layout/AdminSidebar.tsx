@@ -5,7 +5,7 @@ import {
   LayoutDashboard, Users, CreditCard, ArrowLeftRight,
   BarChart2, ShieldAlert, Bell, Terminal, LogOut, Landmark, Banknote
 } from 'lucide-react'
-import { clearSession } from '@/lib/auth'
+import { useSession } from '@/components/SessionProvider'
 
 const nav = [
   { href: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
@@ -21,7 +21,7 @@ const nav = [
 
 export default function AdminSidebar() {
   const pathname = usePathname()
-  const router = useRouter()
+  const { logout } = useSession()
 
   return (
     <aside className="h-screen sticky top-0 w-64 bg-gray-50 dark:bg-[#0d0f14] border-r border-gray-200 dark:border-[#1a1d24] flex flex-col">
@@ -49,7 +49,7 @@ export default function AdminSidebar() {
       </nav>
 
       <div className="p-4 border-t border-gray-200 dark:border-[#1a1d24]">
-        <button onClick={() => { clearSession(); router.push('/') }}
+        <button onClick={() => logout()}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-[#8890a0] hover:bg-[#f05050]/10 hover:text-[#f05050] transition-all">
           <LogOut size={18} /> Logout
         </button>
