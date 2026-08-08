@@ -86,9 +86,9 @@ export default function DashboardPage() {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="w-full flex flex-col gap-6 p-6"
+      className="w-full flex flex-col gap-4 sm:gap-6 p-4 sm:p-6"
     >
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard label="Total Balance" value={formatCurrency(data.totalBalance)} sub="Across all accounts" icon={Wallet} trend={{ value: 'Active', up: true }} accent="green" />
         <StatCard label="Total Accounts" value={String(data.totalAccounts)} sub="Active accounts" icon={TrendingUp} accent="blue" />
         <StatCard label="Customers" value={String(data.totalCustomers)} sub="Registered users" icon={Users} accent="gold" />
@@ -192,22 +192,29 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 + i * 0.05 }}
-                className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-white/5 transition-colors cursor-pointer"
+                className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 px-4 sm:px-6 py-4 hover:bg-white/5 transition-colors cursor-pointer"
               >
-                <div className="flex items-center gap-4 w-1/3 min-w-0">
+                <div className="flex items-start justify-between w-full sm:w-1/3 min-w-0">
                   <div className="min-w-0 flex-1">
                     <p className="text-[14px] font-semibold text-black dark:text-white truncate tracking-tight">{tx.description}</p>
                     <p className="text-[11px] text-[#8890a0] mt-0.5 font-mono uppercase tracking-tighter">{tx.account_no}</p>
                   </div>
+                  <div className="sm:hidden text-right flex-shrink-0 ml-4">
+                    <p className={`text-[15px] font-display font-800 ${tx.type?.toLowerCase() === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
+                      {tx.type?.toLowerCase() === 'deposit' ? '+' : '-'}{formatCurrency(parseFloat(tx.amount))}
+                    </p>
+                  </div>
                 </div>
-                <div className="w-1/4">
-                  <p className="text-[12px] text-[#8890a0]">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</p>
-                </div>
-                <div className="w-1/4">{txBadge(tx.type)}</div>
-                <div className="w-1/6 text-right">
-                  <p className={`text-[15px] font-display font-800 ${tx.type?.toLowerCase() === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
-                    {tx.type?.toLowerCase() === 'deposit' ? '+' : '-'}{formatCurrency(parseFloat(tx.amount))}
-                  </p>
+                <div className="flex items-center justify-between w-full sm:w-2/3">
+                  <div className="w-auto sm:w-1/3">
+                    <p className="text-[12px] text-[#8890a0]">{new Date(tx.transaction_date).toLocaleDateString('en-IN')}</p>
+                  </div>
+                  <div className="w-auto sm:w-1/3">{txBadge(tx.type)}</div>
+                  <div className="hidden sm:block sm:w-1/3 text-right">
+                    <p className={`text-[15px] font-display font-800 ${tx.type?.toLowerCase() === 'deposit' ? 'text-[#00d4aa]' : 'text-[#f05050]'}`}>
+                      {tx.type?.toLowerCase() === 'deposit' ? '+' : '-'}{formatCurrency(parseFloat(tx.amount))}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             ))}

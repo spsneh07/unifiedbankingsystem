@@ -1,5 +1,5 @@
 'use client'
-import { Bell, Search, Moon, Sun, LogOut } from "lucide-react";
+import { Bell, Search, Moon, Sun, LogOut, Menu } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/components/ui/Toast";
@@ -13,7 +13,7 @@ const ROLE_COLORS: Record<string, string> = {
   customer: "#00d4aa",
 };
 
-export default function Header({ title }: { title?: string }) {
+export default function Header({ title, onMenuClick }: { title?: string, onMenuClick?: () => void }) {
   const { theme, toggleTheme } = useTheme();
   const [unreadAlerts, setUnreadAlerts] = useState(0);
   const { user, logout } = useSession();
@@ -49,6 +49,14 @@ export default function Header({ title }: { title?: string }) {
       animate={{ y: 0, opacity: 1 }}
       className="h-16 border-b border-gray-200 dark:border-[#1a1d24] bg-white dark:bg-[#0d0f14] flex items-center px-6 gap-4 sticky top-0 z-30"
     >
+      {onMenuClick && (
+        <button
+          onClick={onMenuClick}
+          className="lg:hidden w-9 h-9 flex items-center justify-center text-[#8890a0] hover:text-black dark:hover:text-white mr-1 -ml-2"
+        >
+          <Menu size={20} />
+        </button>
+      )}
       {title && (
         <motion.h1 
           initial={{ opacity: 0, x: -10 }}

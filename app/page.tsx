@@ -82,13 +82,13 @@ export default function HomePage() {
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
           <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, fontWeight: 800, fontSize: 22, color: '#f0f2f8' }}>
             <Logo size={34} />
-            <span className="tracking-tight">Nexus<span style={{ color: '#00d4aa' }}>Bank</span></span>
+            <span className="tracking-tight hidden sm:block">Nexus<span style={{ color: '#00d4aa' }}>Bank</span></span>
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
-            <Link href="#features" className="nav-link">Features</Link>
-            <Link href="/dashboard" className="nav-link">Dashboard</Link>
-            <Link href="/auth/login" className="nav-link">Login</Link>
-            <Link href="/dashboard" className="glow-btn" style={{ background: 'linear-gradient(135deg,#46f1c5,#00d4aa)', color: '#002118', fontWeight: 700, fontSize: 14, padding: '9px 22px', borderRadius: 8 }}>
+          <div className="flex items-center gap-4 sm:gap-8">
+            <Link href="#features" className="nav-link hidden sm:block">Features</Link>
+            <Link href="/dashboard" className="nav-link hidden sm:block">Dashboard</Link>
+            <Link href="/auth/login" className="nav-link hidden sm:block">Login</Link>
+            <Link href="/dashboard" className="glow-btn whitespace-nowrap" style={{ background: 'linear-gradient(135deg,#46f1c5,#00d4aa)', color: '#002118', fontWeight: 700, fontSize: 14, padding: '9px 22px', borderRadius: 8 }}>
               Get Started
             </Link>
           </div>
@@ -98,13 +98,13 @@ export default function HomePage() {
       <div style={{ position: 'relative', zIndex: 1 }}>
 
         {/* ─── HERO ─── */}
-        <section style={{ padding: '110px 2rem 90px', maxWidth: 1200, margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 72, alignItems: 'center' }}>
+        <section className="px-4 sm:px-8 pt-[80px] sm:pt-[110px] pb-[60px] sm:pb-[90px] max-w-[1200px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-[72px] items-center">
             <motion.div variants={stagger} initial="hidden" animate="show">
               <motion.div variants={fadeUp} style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 100, padding: '6px 14px', marginBottom: 28, fontSize: 12, fontWeight: 600, color: '#00d4aa', letterSpacing: '0.06em' }}>
                 ✦ NEXT-GEN BANKING PLATFORM
               </motion.div>
-              <motion.h1 variants={fadeUp} style={{ fontSize: 60, fontWeight: 900, lineHeight: 1.08, letterSpacing: '-0.03em', marginBottom: 24, color: '#f0f2f8' }}>
+              <motion.h1 variants={fadeUp} className="text-[40px] sm:text-[50px] lg:text-[60px] font-black leading-[1.1] tracking-tight mb-6 text-[#f0f2f8]">
                 One Dashboard<br />for All Your{' '}
                 <span style={{ background: 'linear-gradient(135deg,#46f1c5,#00b894)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                   Bank Accounts
@@ -113,11 +113,11 @@ export default function HomePage() {
               <motion.p variants={fadeUp} style={{ fontSize: 18, color: '#8890a0', lineHeight: 1.75, marginBottom: 40, maxWidth: 480 }}>
                 Manage SBI, HDFC, and ICICI accounts in one unified platform with analytics, fraud detection, and real-time insights.
               </motion.p>
-              <motion.div variants={fadeUp} style={{ display: 'flex', gap: 14 }}>
-                <Link href="/dashboard" className="glow-btn" style={{ background: 'linear-gradient(135deg,#46f1c5,#00d4aa)', color: '#002118', fontWeight: 700, fontSize: 16, padding: '15px 34px', borderRadius: 10 }}>
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <Link href="/dashboard" className="glow-btn text-center" style={{ background: 'linear-gradient(135deg,#46f1c5,#00d4aa)', color: '#002118', fontWeight: 700, fontSize: 16, padding: '15px 34px', borderRadius: 10 }}>
                   Get Started
                 </Link>
-                <Link href="/dashboard" className="ghost-btn" style={{ color: '#e2e2e8', fontWeight: 600, fontSize: 16, padding: '15px 34px', borderRadius: 10 }}>
+                <Link href="/dashboard" className="ghost-btn text-center" style={{ color: '#e2e2e8', fontWeight: 600, fontSize: 16, padding: '15px 34px', borderRadius: 10 }}>
                   View Demo →
                 </Link>
               </motion.div>
@@ -183,7 +183,7 @@ export default function HomePage() {
                 <p style={{ fontSize: 17, color: '#8890a0', maxWidth: 500, margin: '0 auto' }}>Built on secure, robust protocols to handle your most critical financial data with absolute certainty.</p>
               </motion.div>
             </Section>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 20 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {features.map((f, i) => (
                 <motion.div key={f.title} className="feat-card"
                   initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
@@ -215,7 +215,7 @@ export default function HomePage() {
                 <div style={{ flex: 1, textAlign: 'center', fontSize: 12, color: '#8890a0' }}>app.unifiedbank.in/dashboard</div>
               </div>
               <div style={{ padding: 24 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 20 }}>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 mb-5">
                   {[{ l:'Total Balance', v:'₹4,20,000', c:'#00d4aa'}, {l:'Accounts',v:'3',c:'#4090f0'},{l:'Customers',v:'248',c:'#f0c040'},{l:'Fraud Alerts',v:'12',c:'#f05050'}].map(k => (
                     <div key={k.l} style={{ background:'#0f1117', borderRadius:12, padding:18, border:'1px solid rgba(255,255,255,0.06)' }}>
                       <div style={{ fontSize:10, color:'#8890a0', fontWeight:600, letterSpacing:'0.06em', marginBottom:8 }}>{k.l.toUpperCase()}</div>
@@ -223,7 +223,7 @@ export default function HomePage() {
                     </div>
                   ))}
                 </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:14 }}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
                   <div style={{ background:'#0f1117', borderRadius:12, padding:20, border:'1px solid rgba(255,255,255,0.06)' }}>
                     <div style={{ fontSize:13, fontWeight:600, color:'#f0f2f8', marginBottom:4 }}>Monthly Cash Flow</div>
                     <div style={{ fontSize:11, color:'#8890a0', marginBottom:18 }}>Last 6 months</div>
@@ -263,7 +263,7 @@ export default function HomePage() {
                 <h2 style={{ fontSize: 44, fontWeight: 800, color: '#f0f2f8', letterSpacing: '-0.02em' }}>Get started in 3 simple steps</h2>
               </motion.div>
             </Section>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 40 }}>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-10">
               {steps.map((s, i) => (
                 <motion.div key={s.num} style={{ textAlign: 'center' }}
                   initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }}
@@ -301,7 +301,7 @@ export default function HomePage() {
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
             
             {/* Upper Footer: Branding & Newsletter */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 60, marginBottom: 80, alignItems: 'flex-start' }}>
+            <div className="grid grid-cols-1 lg:grid-cols-[1.5fr_1fr] gap-10 lg:gap-[60px] mb-[60px] lg:mb-[80px] items-start">
               <div>
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, fontWeight: 800, fontSize: 24, color: '#f0f2f8', marginBottom: 24 }}>
                   <Logo size={34} />
@@ -332,7 +332,7 @@ export default function HomePage() {
             </div>
 
             {/* Middle Footer: Links Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 40, marginBottom: 80 }}>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-[60px] lg:mb-[80px]">
               <div>
                 <h4 style={{ fontSize: 13, fontWeight: 700, color: '#f0f2f8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24 }}>Product</h4>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -385,11 +385,11 @@ export default function HomePage() {
             </div>
 
             {/* Bottom Footer: Copyright & Social */}
-            <div style={{ paddingTop: 40, borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ fontSize: 13, color: '#3d4455' }}>
+            <div className="pt-10 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="text-[13px] text-[#3d4455] text-center md:text-left">
                 © 2025 NexusBank Financial Technologies Ltd. All rights reserved. Precision engineered in India.
               </div>
-              <div style={{ display: 'flex', gap: 24 }}>
+              <div className="flex flex-wrap justify-center gap-6">
                 {['GitHub', 'LinkedIn', 'X (Twitter)', 'YouTube'].map(social => (
                   <Link key={social} href="#" className="nav-link" style={{ fontSize: 13, color: '#8890a0' }}>{social}</Link>
                 ))}
