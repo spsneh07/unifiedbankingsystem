@@ -42,9 +42,9 @@ async function getDashboard(req, res) {
 
     // ─── Admin / Employee dashboard ───────────────────────────────────────────
     if (userRole === 'admin' || userRole === 'employee') {
-      const [[balRow]] = await pool.execute('SELECT COALESCE(SUM(balance), 0) as totalBalance FROM accounts');
-      const [[accRow]] = await pool.execute('SELECT COUNT(*) as totalAccounts FROM accounts');
-      const [[custRow]] = await pool.execute('SELECT COUNT(*) as totalCustomers FROM customers');
+      const [[balRow]] = await pool.execute('SELECT COALESCE(SUM(balance), 0) as "totalBalance" FROM accounts');
+      const [[accRow]] = await pool.execute('SELECT COUNT(*) as "totalAccounts" FROM accounts');
+      const [[custRow]] = await pool.execute('SELECT COUNT(*) as "totalCustomers" FROM customers');
 
       const [fraudAlerts] = await pool.execute(`
         SELECT t.id, t.amount, t.created_at, t.type, t.description,
@@ -98,11 +98,11 @@ async function getDashboard(req, res) {
     }
 
     const [[balRow]] = await pool.execute(
-      'SELECT COALESCE(SUM(balance), 0) as totalBalance FROM accounts WHERE customer_id = ?',
+      'SELECT COALESCE(SUM(balance), 0) as "totalBalance" FROM accounts WHERE customer_id = ?',
       [customerId]
     );
     const [[accRow]] = await pool.execute(
-      'SELECT COUNT(*) as totalAccounts FROM accounts WHERE customer_id = ?',
+      'SELECT COUNT(*) as "totalAccounts" FROM accounts WHERE customer_id = ?',
       [customerId]
     );
 

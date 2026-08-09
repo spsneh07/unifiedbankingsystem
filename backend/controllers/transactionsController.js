@@ -177,7 +177,7 @@ async function createTransaction(req, res) {
 
     // Fraud detection: flag if > 3× average
     const [avgRes] = await conn.execute(
-      'SELECT AVG(amount) as avg_amt FROM transactions WHERE account_id = ? AND type = ? AND status = "SUCCESS"',
+      'SELECT AVG(amount) as avg_amt FROM transactions WHERE account_id = ? AND type = ? AND status = \'SUCCESS\'',
       [account_id, dbType]
     );
     const avgAmount = parseFloat(avgRes[0]?.avg_amt) || 0;

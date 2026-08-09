@@ -44,7 +44,7 @@ async function manageLoan(req, res) {
       const emi = (P * R * Math.pow(1 + R, N)) / (Math.pow(1 + R, N) - 1);
 
       await query(
-        'INSERT INTO loans (customer_id, amount, interest_rate, tenure, emi, status) VALUES (?, ?, ?, ?, ?, "pending")',
+        'INSERT INTO loans (customer_id, amount, interest_rate, tenure, emi, status) VALUES (?, ?, ?, ?, ?, \'pending\')',
         [customerId, amount, interest_rate, tenure, emi]
       );
       return res.json({ success: true, message: 'Loan application submitted successfully' });
