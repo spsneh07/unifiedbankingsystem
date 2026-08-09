@@ -47,7 +47,7 @@ async function getTransactions(req, res) {
 async function createTransaction(req, res) {
   const conn = await pool.getConnection();
   try {
-    const { type, amount: rawAmount, account_id, receiver_account_id, description, otp, category } = req.body;
+    const { type, amount: rawAmount, account_id, receiver_account_no, description, otp, category } = req.body;
 
     // ─── Input validation ─────────────────────────────────────────────────────
     if (!type || !account_id) {
@@ -81,11 +81,8 @@ async function createTransaction(req, res) {
 
     // ─── Self-transfer check ─────────────────────────────────────────────────
     if (type === 'transfer') {
-      if (!receiver_account_id) {
-        return res.status(400).json({ success: false, error: 'Recipient account is required for transfer' });
-      }
-      if (String(account_id) === String(receiver_account_id)) {
-        return res.status(400).json({ success: false, error: 'Cannot transfer to the same account' });
+      if (!receiver_account_no) {
+        return res.status(400).json({ success: false, error: 'Recipient account number is required for transfer' });
       }
     }
 
@@ -127,16 +124,24 @@ async function createTransaction(req, res) {
 
     // Validate receiver account for transfers
     let receiverAccount = null;
+    let actual_receiver_account_id = null;
     if (type === 'transfer') {
       const [recRes] = await conn.execute(
-        'SELECT id, balance, status FROM accounts WHERE id = ? FOR UPDATE',
-        [receiver_account_id]
+        'SELECT id, balance, status FROM accounts WHERE account_number = ? FOR UPDATE',
+        [receiver_account_no]
       );
       if (!recRes.length) {
         await conn.rollback();
         return res.status(404).json({ success: false, error: 'Recipient account not found' });
       }
       receiverAccount = recRes[0];
+      actual_receiver_account_id = receiverAccount.id;
+
+      if (String(account_id) === String(actual_receiver_account_id)) {
+        await conn.rollback();
+        return res.status(400).json({ success: false, error: 'Cannot transfer to the same account' });
+      }
+
       if (receiverAccount.status?.toLowerCase() !== 'active') {
         await conn.rollback();
         return res.status(400).json({ success: false, error: 'Recipient account is not active' });
@@ -166,12 +171,12 @@ async function createTransaction(req, res) {
       await conn.execute('UPDATE accounts SET balance = balance - ? WHERE id = ?', [txAmount, account_id]);
     } else if (type === 'transfer') {
       await conn.execute('UPDATE accounts SET balance = balance - ? WHERE id = ?', [txAmount, account_id]);
-      await conn.execute('UPDATE accounts SET balance = balance + ? WHERE id = ?', [txAmount, receiver_account_id]);
+      await conn.execute('UPDATE accounts SET balance = balance + ? WHERE id = ?', [txAmount, actual_receiver_account_id]);
 
       // Create mirrored credit transaction for receiver
       await conn.execute(
         'INSERT INTO transactions (account_id, type, amount, description, category, status) VALUES (?, ?, ?, ?, ?, ?)',
-        [receiver_account_id, 'Deposit', txAmount, description || 'Transfer received', 'Transfer', 'SUCCESS']
+        [actual_receiver_account_id, 'Deposit', txAmount, description || 'Transfer received', 'Transfer', 'SUCCESS']
       );
     }
 

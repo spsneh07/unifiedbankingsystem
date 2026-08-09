@@ -140,7 +140,7 @@ function TransactionsPageInner() {
           type: modal,
           amount: parseFloat(amount),
           account_id: parseInt(fromAccount),
-          receiver_account_id: modal === 'transfer' ? parseInt(toAccount) : undefined,
+          receiver_account_no: modal === 'transfer' ? toAccount.trim() : undefined,
           description,
           category,
           otp: (modal === 'withdraw' || modal === 'transfer') ? otp : undefined
@@ -399,8 +399,8 @@ function TransactionsPageInner() {
               </select>
             </div>
             <div className="col-span-2">
-              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2 uppercase tracking-wider">Recipient Account ID</label>
-              <input className="input focus:border-[#4090f0]/50 transition-all" type="number" placeholder="Target Account ID" value={toAccount} onChange={(e) => setToAccount(e.target.value)} />
+              <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2 uppercase tracking-wider">Recipient Account No</label>
+              <input className="input focus:border-[#4090f0]/50 transition-all" type="text" placeholder="Target Account No (e.g. ACC1002)" value={toAccount} onChange={(e) => setToAccount(e.target.value)} />
             </div>
             <div>
               <label className="block text-[12px] font-display font-600 text-[#8890a0] mb-2 uppercase tracking-wider">Amount (₹)</label>
