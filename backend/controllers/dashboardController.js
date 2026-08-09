@@ -70,8 +70,8 @@ async function getDashboard(req, res) {
           EXTRACT(YEAR FROM created_at) as year, 
           EXTRACT(MONTH FROM created_at) as month_num,
           TO_CHAR(created_at, 'Mon') as month,
-          SUM(CASE WHEN type IN ('deposit', 'Deposit') THEN amount ELSE 0 END) as income,
-          SUM(CASE WHEN type IN ('withdrawal', 'Withdrawal', 'transfer', 'Transfer') THEN amount ELSE 0 END) as expenses
+          SUM(CASE WHEN type IN ('deposit', 'Deposit') THEN amount ELSE 0 END) as deposits,
+          SUM(CASE WHEN type IN ('withdrawal', 'Withdrawal', 'transfer', 'Transfer') THEN amount ELSE 0 END) as withdrawals
         FROM transactions
         WHERE created_at >= NOW() - INTERVAL '6 months'
           AND status = 'SUCCESS'
@@ -138,8 +138,8 @@ async function getDashboard(req, res) {
         EXTRACT(YEAR FROM t.created_at) as year, 
         EXTRACT(MONTH FROM t.created_at) as month_num,
         TO_CHAR(t.created_at, 'Mon') as month,
-        SUM(CASE WHEN t.type IN ('deposit', 'Deposit') THEN t.amount ELSE 0 END) as income,
-        SUM(CASE WHEN t.type IN ('withdrawal', 'Withdrawal', 'transfer', 'Transfer') THEN t.amount ELSE 0 END) as expenses
+        SUM(CASE WHEN t.type IN ('deposit', 'Deposit') THEN t.amount ELSE 0 END) as deposits,
+        SUM(CASE WHEN t.type IN ('withdrawal', 'Withdrawal', 'transfer', 'Transfer') THEN t.amount ELSE 0 END) as withdrawals
       FROM transactions t
       JOIN accounts a ON t.account_id = a.id
       WHERE t.created_at >= NOW() - INTERVAL '6 months'
